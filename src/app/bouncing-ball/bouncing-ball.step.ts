@@ -39,9 +39,9 @@ export class BouncingBallStep extends GameStep {
     this.timerLabel.fontSize = 15;
 
     // Sounds
-    this.board.registerSound("music", "./assets/bouncing-ball/sounds/music.mp3");
-    this.board.registerSound("wall", "./assets/bouncing-ball/sounds/wall.mp3");
-    this.board.registerSound("ball", "./assets/bouncing-ball/sounds/ball.mp3");
+    this.board.registerSound("music", "./assets/bouncing-ball/sounds/music.mp3", true, 0.1);
+    this.board.registerSound("wall", "./assets/bouncing-ball/sounds/wall.mp3", false, 0.7);
+    this.board.registerSound("ball", "./assets/bouncing-ball/sounds/ball.mp3", false, 0.7);
   }
 
   onEnter(data: any): void {
@@ -60,7 +60,8 @@ export class BouncingBallStep extends GameStep {
 
   start() {
     this.board.changeCursor("none");
-    this.board.playSound("music", true, 0.1);
+    this.ennemies = [];
+    this.board.playSound("music");
 
     this.createPlayerBall();
     this.addEnnemy();
@@ -85,7 +86,9 @@ export class BouncingBallStep extends GameStep {
       }
     });
     this.board.onMouseEvent("mouseenter", () => {
-      this.board.changeCursor("none");
+      if (this.player.alive) {
+        this.board.changeCursor("none");
+      }
     });
     this.board.onMouseEvent("mouseleave", () => {
       this.board.changeCursor("default");
@@ -107,7 +110,7 @@ export class BouncingBallStep extends GameStep {
   }
 
   addEnnemy() {
-    let ennemy = new Ennemy(BouncingBallStep.random(WALL_WIDTH+1, this.board.width - BALLS_RADIUS*2-WALL_WIDTH-1), BouncingBallStep.random(WALL_WIDTH+1, this.board.height - BALLS_RADIUS*2-WALL_WIDTH-1), BALLS_RADIUS, BALLS_RADIUS, "#ED553B", "#ED553B");
+    let ennemy = new Ennemy(BouncingBallStep.random(WALL_WIDTH+BALLS_RADIUS+1, this.board.width - BALLS_RADIUS-WALL_WIDTH-1), BouncingBallStep.random(WALL_WIDTH+BALLS_RADIUS+1, this.board.height - BALLS_RADIUS-WALL_WIDTH-1), BALLS_RADIUS, BALLS_RADIUS, "#ED553B", "#ED553B");
     ennemy.stopped = true;
     ennemy.directionDegrees = BouncingBallStep.random(0, 359);
     this.board.addTimer(BALL_START_TIMER*1000, () => {
@@ -121,7 +124,8 @@ export class BouncingBallStep extends GameStep {
       // Wall collison
       if (collisionWith instanceof Wall) {
         if (this.player.alive) {
-          this.board.playSound("wall", false, 1.0);
+          console.log("WALL");
+          this.board.playSound("wall");
           ennemy.x -= result.overlap * result.overlap_x;
           ennemy.y -= result.overlap * result.overlap_y;
           let dot = ennemy.directionX * result.overlap_y + ennemy.directionY * -result.overlap_x
