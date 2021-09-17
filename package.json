@@ -1,17 +1,17 @@
 {
   "name": "particles",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": "Steve Cohen",
-  "description": "Don't touch red balls !",
+  "description": "Use your cursor to move the blue ball and don't touch the bad red balls !",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/fuwu-yuan/particles.git"
+    "url": "https://github.com/fuwu-yuan/particles.git"
   },
   "keywords": [
     "game",
     "2dgame",
     "game2d",
-    "physic",
+    "physics",
     "bgew"
   ],
   "license": "ISC",
@@ -43,7 +43,7 @@
     "@fortawesome/fontawesome-svg-core": "^1.2.35",
     "@fortawesome/free-brands-svg-icons": "^5.15.3",
     "@fortawesome/free-solid-svg-icons": "^5.15.3",
-    "@fuwu-yuan/bgew": "^1.6.0",
+    "@fuwu-yuan/bgew": "^1.6.1",
     "rxjs": "~6.6.0",
     "tslib": "^2.0.0",
     "zone.js": "~0.10.2"

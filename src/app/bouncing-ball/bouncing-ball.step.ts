@@ -110,7 +110,7 @@ export class BouncingBallStep extends GameStep {
   }
 
   addEnnemy() {
-    let ennemy = new Ennemy(BouncingBallStep.random(WALL_WIDTH+BALLS_RADIUS+1, this.board.width - BALLS_RADIUS-WALL_WIDTH-1), BouncingBallStep.random(WALL_WIDTH+BALLS_RADIUS+1, this.board.height - BALLS_RADIUS-WALL_WIDTH-1), BALLS_RADIUS, BALLS_RADIUS, "#ED553B", "#ED553B");
+    let ennemy = new Ennemy(BouncingBallStep.random(WALL_WIDTH+BALLS_RADIUS+10, this.board.width - BALLS_RADIUS-WALL_WIDTH-50), BouncingBallStep.random(WALL_WIDTH+BALLS_RADIUS+10, this.board.height - BALLS_RADIUS-WALL_WIDTH-50), BALLS_RADIUS, BALLS_RADIUS, "#ED553B", "#ED553B");
     ennemy.stopped = true;
     ennemy.directionDegrees = BouncingBallStep.random(0, 359);
     this.board.addTimer(BALL_START_TIMER*1000, () => {
