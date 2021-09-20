@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import { faFacebook, faTwitter, faLinkedin } from '@fortawesome/free-brands-svg-icons';
 import { faMailBulk } from "@fortawesome/free-solid-svg-icons";
-import {version, repository, name, author, keywords, description} from '../../package.json';
+import {version, repository, name, author, keywords, description, config} from '../../package.json';
 import {Meta, Title} from '@angular/platform-browser';
 import {Board} from "@fuwu-yuan/bgew";
 import {BouncingBallStep} from "./bouncing-ball/bouncing-ball.step";
@@ -35,7 +35,7 @@ export class AppComponent implements OnInit {
     // og:description
     this.meta.updateTag({property:'og:description', content: description});
     // og:image
-    this.meta.updateTag({property: 'og:image', content: window.location.origin+"/assets/og/image.jpg"});
+    this.meta.updateTag({property: 'og:image', content: window.location.origin + config.deployuri + "/assets/og/image.jpg"});
     this.meta.updateTag({property: 'og:image:type', content: "image/jpg"});
     this.meta.updateTag({property: 'og:image:width', content: "1200"});
     this.meta.updateTag({property: 'og:image:height', content: "627"});
