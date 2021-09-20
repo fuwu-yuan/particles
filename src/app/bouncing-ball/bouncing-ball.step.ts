@@ -2,6 +2,8 @@ import {Board, Entities, GameStep, Timer} from '@fuwu-yuan/bgew';
 import {Player} from "./player";
 import {Ennemy} from "./ennemy";
 import {Wall} from "./wall";
+import {RestInCloudAPI} from 'restincloud-node';
+import {Score} from "./score";
 
 const WALL_WIDTH = 10;
 const BALLS_RADIUS = 20;
@@ -9,6 +11,8 @@ const BALL_START_TIMER = 3; //ms
 const BALLS_SPEED = { MIN: 100, MAX: 300};
 const NEW_BALL_TIMER = 10; // seconds
 const MAX_ENNEMIES = 25;
+
+const RESTINCLOUD_API_TOKEN = "jvwq9bT2t6ykDHqF";
 
 export class BouncingBallStep extends GameStep {
   name: string = "bouncing-ball";
@@ -22,6 +26,8 @@ export class BouncingBallStep extends GameStep {
   private newEnnemyTimer: Timer;
   private elapsedMs: number = 0;
   private timerLabel: Entities.Label;
+  private restInCloudApi: RestInCloudAPI;
+  private scores?: Score[] = [];
 
   constructor(board: Board) {
     super(board);
@@ -42,6 +48,9 @@ export class BouncingBallStep extends GameStep {
     this.board.registerSound("music", "./assets/bouncing-ball/sounds/music.mp3", true, 0.1);
     this.board.registerSound("wall", "./assets/bouncing-ball/sounds/wall.mp3", false, 0.7);
     this.board.registerSound("ball", "./assets/bouncing-ball/sounds/ball.mp3", false, 0.7);
+
+    this.restInCloudApi = new RestInCloudAPI(RESTINCLOUD_API_TOKEN)
+    this.updateScores();
   }
 
   onEnter(data: any): void {
@@ -79,6 +88,7 @@ export class BouncingBallStep extends GameStep {
 
   private createPlayerBall() {
     this.player = new Player(this.board.width / 2, this.board.height / 2, BALLS_RADIUS, BALLS_RADIUS, "#20639B", "#20639B");
+    this.player.alive = true;
     this.board.onMouseEvent("mousemove", (event, x, y) => {
       if (this.player.alive && x > WALL_WIDTH && y > WALL_WIDTH) {
         this.player.x = x;
@@ -157,8 +167,6 @@ export class BouncingBallStep extends GameStep {
 
           ennemy.directionX = 2 * dot * result.overlap_y - ennemy.directionX;
           ennemy.directionY = 2 * dot * -result.overlap_x - ennemy.directionY;
-          console.log(ennemy.directionDegrees);
-          console.log(ennemy.direction);
           this.playerLoose();
         }
       }
@@ -182,26 +190,110 @@ export class BouncingBallStep extends GameStep {
       for (const ennemy of this.ennemies) {
         this.board.removeEntity(ennemy);
       }
-      // Score
-      let score = new Entities.Label(0, 0, "Score: " + this.formatMilliseconds(this.elapsedMs, true), this.board.ctx);
-      score.fontSize = 25;
-      score.x = this.board.width / 2 - score.width / 2;
-      score.y = this.board.height / 2 - score.height / 2;
-      this.board.addEntity(score);
+      this.timerLabel.text = "";
+      // TOP 10
+      let top10Container = new Entities.Container(0, 0, this.board.width, this.board.height / 3 * 2);
+      top10Container.addEntity(new Entities.Rectangle(0, 0, top10Container.width, top10Container.height, "black", "transparent"));
+      let top10Title = new Entities.Label(0, 50, "TOP 10", this.board.ctx);
+      top10Title.x = top10Container.width / 2 - top10Title.width / 2;
+      top10Title.fontSize = 30;
+      top10Container.addEntity(top10Title);
 
-      // Restart
+      this.addScore(this.elapsedMs, this.ennemies.length).then(() => {
+        let top10values = this.scores.map((s: Score) => {
+          return `[${s.name}] ${this.formatMilliseconds(s.duration, true)} | ${s.balls} BALLS`;
+        });
+        let firstLabel = null;
+        let medals = ["🥇 ", "🥈 ", "🥉 ", "4. ", "5. ", "6. ", "7. ", "8. ", "9. ", "10. "];
+        for (let i = 0; i < top10values.length; i++) {
+          let top10Label = new Entities.Label(10, top10Title.y + top10Title.height + 50 + 30*i, medals[i] + top10values[i], this.board.ctx);
+          top10Label.x = this.board.width / 2 - top10Label.width / 2;
+          if (firstLabel) top10Label.x = firstLabel.x;
+          top10Container.addEntity(top10Label);
+          if (firstLabel === null) firstLabel = top10Label;
+        }
+        this.board.addEntity(top10Container);
+      });
+
+      // RESTART
       let btnSize = { width: 200, height: 50 };
-      let restart = new Entities.Button(this.board.width / 2 - btnSize.width / 2, this.board.height / 2 + score.height + 20, btnSize.width, btnSize.height, "Try again");
+      let restart = new Entities.Button(this.board.width / 2 - btnSize.width / 2, this.board.height - btnSize.height - 50, btnSize.width, btnSize.height, "Try again");
       restart.hoverFillColor = "black";
       restart.hoverStrokeColor = "white";
       restart.hoverFontColor = "white";
       restart.onMouseEvent("click", () => {
-        this.board.removeEntity(score);
-        this.board.removeEntity(restart);
+        this.board.removeEntities([score, restart, top10Container]);
         this.start();
       });
       this.board.addEntity(restart);
+
+      // SCORE
+      let score = new Entities.Label(0, 0, "Score: " + this.formatMilliseconds(this.elapsedMs, true) + " | " + this.ennemies.length + " BALLS", this.board.ctx);
+      score.fontSize = 25;
+      score.x = this.board.width / 2 - score.width / 2;
+      score.y = restart.y - restart.height - score.height - 50;
+      this.board.addEntity(score);
     }, false);
+  }
+
+  private updateScores() {
+    return this.restInCloudApi.getVar("scores")
+      .then((value) => {
+        if (value.code === "success") {
+          this.scores = JSON.parse(value.result.value);
+          this.scores = this.scores.sort((a, b) => {
+            return b.duration - a.duration;
+          });
+          console.log("Scores uodated: ", this.scores);
+        }else if (value.code === "not_found") {
+          this.scores = [];
+        }else {
+          this.scores = null;
+        }
+      }).catch(err => {
+    });
+  }
+
+  private addScore(time: number, balls: number) {
+    console.log("Adding score: ", {time: time, balls: balls});
+    return this.updateScores().then(() => {
+      let rank = this.getRank(time);
+      console.log("Player rank: " + rank);
+      if (this.scores !== null && rank <= 10) {
+        let name = window.prompt("Congratulation, you are in TOP 10 ! Please enter your name (10 char max) :", "");
+        if (name === "") return;
+        name = name.slice(0, 10);
+        return this.getClientIp().then((ip: any) => {
+          console.log("ip: ", ip);
+          this.scores.splice(rank-1, 0 , {
+            balls: balls,
+            timestamp: (new Date()).getMilliseconds(),
+            duration: time,
+            ip: ip.ip,
+            name: name,
+            user_agent: navigator.userAgent
+          });
+          this.scores = this.scores.slice(0, 10); // Keep only 10 scores (top 10)
+          return this.restInCloudApi.putVar("scores", JSON.stringify(this.scores)).then((value) => {
+            console.log("Score sent to server: " + value.code);
+            return {code: "success", result: this.scores};
+          });
+        });
+      }else {
+        return {code: "success", result: this.scores};
+      }
+    })
+  }
+
+  private getRank(duration) {
+    let rank = 1;
+    for (const score of this.scores) {
+      if (duration > score.duration) {
+        break;
+      }
+      rank++;
+    }
+    return rank;
   }
 
   private formatMilliseconds(milliseconds, padStart = false) {
@@ -224,6 +316,24 @@ export class BouncingBallStep extends GameStep {
     return hours
       ? `${padStart ? pad(hours) : hours}:${pad(minutes)}:${pad(seconds)}:${pad(ms)}`
       : `${padStart ? pad(minutes) : minutes}:${pad(seconds)}:${pad(ms)}`;
+  }
+
+  private getClientIp() {
+    return new Promise<any>((resolve, reject) => {
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function() {
+        if (this.readyState == 4) {
+          if (this.status == 200) {
+            let data = JSON.parse(xhttp.responseText);
+            resolve(data);
+          }else {
+            reject();
+          }
+        }
+      };
+      xhttp.open("GET", "//api.ipstack.com/check?access_key=5f3d4ae4b4dceb19f4300c139e4a73d7", true);
+      xhttp.send();
+    });
   }
 
 
