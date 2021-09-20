@@ -4,6 +4,7 @@ import {Ennemy} from "./ennemy";
 import {Wall} from "./wall";
 import {RestInCloudAPI} from 'restincloud-node';
 import {Score} from "./score";
+import {environment} from '../../environments/environment';
 
 const WALL_WIDTH = 10;
 const BALLS_RADIUS = 20;
@@ -11,8 +12,6 @@ const BALL_START_TIMER = 3; //ms
 const BALLS_SPEED = { MIN: 100, MAX: 300};
 const NEW_BALL_TIMER = 10; // seconds
 const MAX_ENNEMIES = 25;
-
-const RESTINCLOUD_API_TOKEN = "jvwq9bT2t6ykDHqF";
 
 export class BouncingBallStep extends GameStep {
   name: string = "bouncing-ball";
@@ -50,7 +49,7 @@ export class BouncingBallStep extends GameStep {
     this.board.registerSound("wall", "./assets/bouncing-ball/sounds/wall.mp3", false, 0.7);
     this.board.registerSound("ball", "./assets/bouncing-ball/sounds/ball.mp3", false, 0.7);
 
-    this.restInCloudApi = new RestInCloudAPI(RESTINCLOUD_API_TOKEN);
+    this.restInCloudApi = new RestInCloudAPI(environment.restincloud_api_token);
     this.bestScore = new Entities.Label(0, 20, "", board.ctx);
     this.bestScore.fontSize = 15;
     this.board.addEntity(this.bestScore);
@@ -242,7 +241,7 @@ export class BouncingBallStep extends GameStep {
   }
 
   private updateScores() {
-    return this.restInCloudApi.getVar("scores")
+    return this.restInCloudApi.getVar(environment.restincloud_api_scores_key)
       .then((value) => {
         if (value.code === "success") {
           this.scores = JSON.parse(value.result.value);
@@ -287,7 +286,7 @@ export class BouncingBallStep extends GameStep {
             user_agent: navigator.userAgent
           });
           this.scores = this.scores.slice(0, 10); // Keep only 10 scores (top 10)
-          return this.restInCloudApi.putVar("scores", JSON.stringify(this.scores)).then((value) => {
+          return this.restInCloudApi.putVar(environment.restincloud_api_scores_key, JSON.stringify(this.scores)).then((value) => {
             console.log("Score sent to server: " + value.code);
             return {code: "success", result: this.scores};
           });

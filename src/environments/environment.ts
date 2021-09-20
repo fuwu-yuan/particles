@@ -3,7 +3,9 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false
+  production: false,
+  restincloud_api_token: "jvwq9bT2t6ykDHqF",
+  restincloud_api_scores_key: "scores-dev"
 };
 
 /*
