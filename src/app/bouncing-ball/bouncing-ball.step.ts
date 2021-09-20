@@ -28,6 +28,7 @@ export class BouncingBallStep extends GameStep {
   private timerLabel: Entities.Label;
   private restInCloudApi: RestInCloudAPI;
   private scores?: Score[] = [];
+  private bestScore;
 
   constructor(board: Board) {
     super(board);
@@ -49,8 +50,11 @@ export class BouncingBallStep extends GameStep {
     this.board.registerSound("wall", "./assets/bouncing-ball/sounds/wall.mp3", false, 0.7);
     this.board.registerSound("ball", "./assets/bouncing-ball/sounds/ball.mp3", false, 0.7);
 
-    this.restInCloudApi = new RestInCloudAPI(RESTINCLOUD_API_TOKEN)
-    this.updateScores();
+    this.restInCloudApi = new RestInCloudAPI(RESTINCLOUD_API_TOKEN);
+    this.bestScore = new Entities.Label(0, 20, "", board.ctx);
+    this.bestScore.fontSize = 15;
+    this.board.addEntity(this.bestScore);
+    this.updateScores().then(() => { this.updateBest(); });
   }
 
   onEnter(data: any): void {
@@ -212,6 +216,7 @@ export class BouncingBallStep extends GameStep {
           top10Container.addEntity(top10Label);
           if (firstLabel === null) firstLabel = top10Label;
         }
+        this.updateBest();
         this.board.addEntity(top10Container);
       });
 
@@ -252,6 +257,14 @@ export class BouncingBallStep extends GameStep {
         }
       }).catch(err => {
     });
+  }
+
+  private updateBest() {
+    if (this.scores.length > 0) {
+      let s = this.scores[0];
+      this.bestScore.text = "🥇 " + `[${s.name}] ${this.formatMilliseconds(s.duration, true)} | ${s.balls} BALLS`;
+      this.bestScore.x = this.board.width - this.bestScore.width - 20;
+    }
   }
 
   private addScore(time: number, balls: number) {
