@@ -273,7 +273,7 @@ export class BouncingBallStep extends GameStep {
       console.log("Player rank: " + rank);
       if (this.scores !== null && rank <= 10) {
         let name = window.prompt("Congratulation, you are in TOP 10 ! Please enter your name (10 char max) :", "");
-        if (name === "") return;
+        if (name === ""|| name === null) return;
         name = name.slice(0, 10);
         return this.getClientIp().then((ip: any) => {
           console.log("ip: ", ip);
