@@ -25,21 +25,21 @@ export class AppComponent implements OnInit {
     // Title
     this.initMeta();
     // Author
-    this.meta.updateTag({name:'author', content: author});
+    this.meta.addTag({name:'author', content: author});
     // Keywords
-    this.meta.updateTag({name:'keyword', content: keywords.join(", ")});
+    this.meta.addTag({name:'keyword', content: keywords.join(", ")});
     // Description
-    this.meta.updateTag({name:'description', content: description});
+    this.meta.addTag({name:'description', content: description});
     // og:title
-    this.meta.updateTag({property:'og:title', content: this.title});
+    this.meta.addTag({property:'og:title', content: this.title});
     // og:description
-    this.meta.updateTag({property:'og:description', content: description});
+    this.meta.addTag({property:'og:description', content: description});
     // og:image
-    this.meta.updateTag({property: 'og:image', content: window.location.origin + config.deployuri + "/assets/og/image.jpg"});
-    this.meta.updateTag({property: 'og:image:type', content: "image/jpg"});
-    this.meta.updateTag({property: 'og:image:width', content: "1200"});
-    this.meta.updateTag({property: 'og:image:height', content: "627"});
-    this.meta.updateTag({property: 'og:image:alt', content: "Particles game screenshot"});
+    this.meta.addTag({property: 'og:image', content: window.location.origin + config.deployuri + "/assets/og/image.jpg"});
+    this.meta.addTag({property: 'og:image:type', content: "image/jpg"});
+    this.meta.addTag({property: 'og:image:width', content: "1200"});
+    this.meta.addTag({property: 'og:image:height', content: "627"});
+    this.meta.addTag({property: 'og:image:alt', content: "Particles game screenshot"});
   }
 
   private initMeta() {
