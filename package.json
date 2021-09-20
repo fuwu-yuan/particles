@@ -19,6 +19,7 @@
     "url": "https://github.com/fuwu-yuan/particles/issues"
   },
   "homepage": "https://github.com/fuwu-yuan/particles#readme",
+  "deploy-uri": "/particles",
   "scripts": {
     "ng": "ng",
     "start": "ng serve --live-reload=false",
@@ -26,7 +27,7 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "deploy": "ng deploy --base-href=/particles/",
+    "deploy": "ng deploy --base-href=${npm_package_deploy-uri}/",
     "push": "git add -A && git commit -m 'some updates' && git push origin master"
   },
   "private": true,
