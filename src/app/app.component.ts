@@ -5,6 +5,7 @@ import {version, repository, name, author, keywords, description, config} from '
 import {Meta, Title} from '@angular/platform-browser';
 import {Board} from "@fuwu-yuan/bgew";
 import {BouncingBallStep} from "./bouncing-ball/bouncing-ball.step";
+import {environment} from "../environments/environment"
 
 @Component({
   selector: 'app-root',
@@ -22,8 +23,15 @@ export class AppComponent implements OnInit {
   sources = repository.url;
 
   constructor(private metatitle: Title, private meta: Meta) {
-    // Title
+    if (environment.production) {
+      console.log = () => {}; // Silent is gold
+    }
     this.initMeta();
+  }
+
+  private initMeta() {
+    // Title
+    this.metatitle.setTitle(this.title);
     // Author
     this.meta.updateTag({name:'author', content: author});
     // Keywords
@@ -40,10 +48,6 @@ export class AppComponent implements OnInit {
     this.meta.updateTag({property: 'og:image:width', content: "1200"});
     this.meta.updateTag({property: 'og:image:height', content: "627"});
     this.meta.updateTag({property: 'og:image:alt', content: "Particles game screenshot"});
-  }
-
-  private initMeta() {
-    this.metatitle.setTitle(this.title);
 
   }
 
