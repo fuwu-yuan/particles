@@ -32,13 +32,13 @@ export class BouncingBallStep extends GameStep {
   constructor(board: Board) {
     super(board);
     //Left
-    this.wallLeft = new Wall(0, 0, WALL_WIDTH, board.height, "#173F5F", "#173F5F");
+    this.wallLeft = new Wall(-WALL_WIDTH, -WALL_WIDTH, WALL_WIDTH*2, board.height + 2*WALL_WIDTH, "#173F5F", "#173F5F");
     //Top
-    this.wallTop = new Wall(0, 0, board.width, WALL_WIDTH, "#173F5F", "#173F5F");
+    this.wallTop = new Wall(-WALL_WIDTH, -WALL_WIDTH, board.width + 2*WALL_WIDTH, WALL_WIDTH*2, "#173F5F", "#173F5F");
     //Right
-    this.wallRight = new Wall(board.width - WALL_WIDTH, 0, WALL_WIDTH, board.height, "#173F5F", "#173F5F");
+    this.wallRight = new Wall(board.width - WALL_WIDTH, -WALL_WIDTH, WALL_WIDTH*2, board.height+WALL_WIDTH*2, "#173F5F", "#173F5F");
     //Bottom
-    this.wallBottom = new Wall(0, board.height - WALL_WIDTH, board.width, WALL_WIDTH, "#173F5F", "#173F5F");
+    this.wallBottom = new Wall(-WALL_WIDTH, board.height - WALL_WIDTH, board.width+WALL_WIDTH*2, WALL_WIDTH*2, "#173F5F", "#173F5F");
 
     // Timer
     this.timerLabel = new Entities.Label(20, 20, "00:00:00", board.ctx);
@@ -125,13 +125,12 @@ export class BouncingBallStep extends GameStep {
   addEnnemy() {
     let ennemy = new Ennemy(BouncingBallStep.random(WALL_WIDTH+BALLS_RADIUS+10, this.board.width - BALLS_RADIUS-WALL_WIDTH-50), BouncingBallStep.random(WALL_WIDTH+BALLS_RADIUS+10, this.board.height - BALLS_RADIUS-WALL_WIDTH-50), BALLS_RADIUS, BALLS_RADIUS, "#ED553B", "#ED553B");
     ennemy.stopped = true;
-    ennemy.directionDegrees = BouncingBallStep.random(0, 359);
     this.board.addTimer(BALL_START_TIMER*1000, () => {
-      ennemy.speed = BouncingBallStep.random(BALLS_SPEED.MIN, BALLS_SPEED.MAX);
+      ennemy.setSpeedWithAngle(BouncingBallStep.random(BALLS_SPEED.MIN, BALLS_SPEED.MAX), BouncingBallStep.random(0, 359), true);
       ennemy.stopped = false;
     }, false);
+    console.log("New ball added: ", {angle: ennemy.angle, degrees: ennemy.angleInDegrees, speed: ennemy.speed, speedX: ennemy.speedX, speedY: ennemy.speedY});
     // Check ball collision
-    console.log("New ball added: ", {direction: ennemy.directionDegrees, directionX: ennemy.directionX, directionY: ennemy.directionY, speedX: ennemy.speedX, speedY: ennemy.speedY});
     ennemy.onIntersectWithAnyEntity((entity, collisionWith, result) => {
 
       // Wall collison
@@ -141,10 +140,10 @@ export class BouncingBallStep extends GameStep {
           this.board.playSound("wall");
           ennemy.x -= result.overlap * result.overlap_x;
           ennemy.y -= result.overlap * result.overlap_y;
-          let dot = ennemy.directionX * result.overlap_y + ennemy.directionY * -result.overlap_x
+          let dot = ennemy.speedX * result.overlap_y + ennemy.speedY * -result.overlap_x
 
-          ennemy.directionX = 2 * dot * result.overlap_y - ennemy.directionX;
-          ennemy.directionY = 2 * dot * -result.overlap_x - ennemy.directionY;
+          ennemy.speedX = 2 * dot * result.overlap_y - ennemy.speedX;
+          ennemy.speedY = 2 * dot * -result.overlap_x - ennemy.speedY;
         }
       }
 
@@ -154,10 +153,10 @@ export class BouncingBallStep extends GameStep {
         this.board.playSound("ball");
         ennemy.x -= result.overlap * result.overlap_x;
         ennemy.y -= result.overlap * result.overlap_y;
-        let dot = collisionWith.directionX * result.overlap_y + collisionWith.directionY * -result.overlap_x;
+        let dot = collisionWith.speedX * result.overlap_y + collisionWith.speedY * -result.overlap_x;
 
-        collisionWith.directionX = 2 * dot * result.overlap_y - collisionWith.directionX;
-        collisionWith.directionY = 2 * dot * -result.overlap_x - collisionWith.directionY;
+        collisionWith.speedX = 2 * dot * result.overlap_y - collisionWith.speedX;
+        collisionWith.speedY = 2 * dot * -result.overlap_x - collisionWith.speedY;
       }
 
       // Player collision
@@ -166,10 +165,10 @@ export class BouncingBallStep extends GameStep {
           this.board.playSound("ball");
           ennemy.x -= result.overlap * result.overlap_x;
           ennemy.y -= result.overlap * result.overlap_y;
-          let dot = ennemy.directionX * result.overlap_y + ennemy.directionY * -result.overlap_x
+          let dot = ennemy.speedX * result.overlap_y + ennemy.speedY * -result.overlap_x
 
-          ennemy.directionX = 2 * dot * result.overlap_y - ennemy.directionX;
-          ennemy.directionY = 2 * dot * -result.overlap_x - ennemy.directionY;
+          ennemy.speedX = 2 * dot * result.overlap_y - ennemy.speedX;
+          ennemy.speedY = 2 * dot * -result.overlap_x - ennemy.speedY;
           this.playerLoose();
         }
       }
@@ -182,10 +181,10 @@ export class BouncingBallStep extends GameStep {
   private playerLoose() {
     this.board.stopSound("music", true, 2000);
     this.player.alive = false;
-    this.player.directionDegrees = 90;
+    /*this.player.angleInDegrees = 90;
     for (const ennemy of this.ennemies) {
-      ennemy.directionDegrees = 90;
-    }
+      ennemy.angleInDegrees = 90;
+    }*/
     this.newEnnemyTimer.stop();
     this.board.addTimer(3000, () => {
       this.board.changeCursor("default");
@@ -255,7 +254,7 @@ export class BouncingBallStep extends GameStep {
           this.scores = null;
         }
       }).catch(err => {
-    });
+      });
   }
 
   private updateBest() {
@@ -360,9 +359,9 @@ export class BouncingBallStep extends GameStep {
       this.timerLabel.text = this.formatMilliseconds(this.elapsedMs, true) + " | " + this.ennemies.length + " BALLS";
     }
     if (this.player && !this.player.alive && this.board.entities.indexOf(this.player) > -1) {
-      this.player.speed += 5;
+      this.player.speedY += 5;
       for (const ennemy of this.ennemies) {
-        ennemy.speed += 5;
+        ennemy.speedY += 5;
       }
     }
   }
