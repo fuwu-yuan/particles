@@ -155,7 +155,9 @@ export class BouncingBallStep extends GameStep {
         ennemy.y -= result.overlap * result.overlap_y;
         let dot = collisionWith.speedX * result.overlap_y + collisionWith.speedY * -result.overlap_x;
 
-        collisionWith.speedX = 2 * dot * result.overlap_y - collisionWith.speedX;
+        if (this.player.alive) {
+          collisionWith.speedX = 2 * dot * result.overlap_y - collisionWith.speedX;
+        }
         collisionWith.speedY = 2 * dot * -result.overlap_x - collisionWith.speedY;
       }
 
