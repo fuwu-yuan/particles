@@ -5,6 +5,7 @@ import {Wall} from "./wall";
 import {RestInCloudAPI} from 'restincloud-node';
 import {Score} from "./score";
 import {environment} from '../../environments/environment';
+import {Ball} from "./Ball";
 
 const WALL_WIDTH = 10;
 const BALLS_RADIUS = 20;
@@ -15,11 +16,7 @@ const MAX_ENNEMIES = 25;
 
 export class BouncingBallStep extends GameStep {
   name: string = "bouncing-ball";
-  private wallLeft: Wall;
-  private wallTop: Wall;
-  private wallRight: Wall;
-  private wallBottom: Wall;
-
+  private walls: Wall[];
   private player?: Player;
   private ennemies: Ennemy[] = [];
   private newEnnemyTimer: Timer;
@@ -28,18 +25,20 @@ export class BouncingBallStep extends GameStep {
   private restInCloudApi: RestInCloudAPI;
   private scores?: Score[] = [];
   private bestScore;
+  private mouseMovement : {x: number, y: number} = {x: 0, y: 0};
 
   constructor(board: Board) {
     super(board);
-    //Left
-    this.wallLeft = new Wall(-WALL_WIDTH, -WALL_WIDTH, WALL_WIDTH*2, board.height + 2*WALL_WIDTH, "#173F5F", "#173F5F");
-    //Top
-    this.wallTop = new Wall(-WALL_WIDTH, -WALL_WIDTH, board.width + 2*WALL_WIDTH, WALL_WIDTH*2, "#173F5F", "#173F5F");
-    //Right
-    this.wallRight = new Wall(board.width - WALL_WIDTH, -WALL_WIDTH, WALL_WIDTH*2, board.height+WALL_WIDTH*2, "#173F5F", "#173F5F");
-    //Bottom
-    this.wallBottom = new Wall(-WALL_WIDTH, board.height - WALL_WIDTH, board.width+WALL_WIDTH*2, WALL_WIDTH*2, "#173F5F", "#173F5F");
-
+    this.walls = [
+      //Left
+      new Wall(-WALL_WIDTH, -WALL_WIDTH, WALL_WIDTH*2, board.height + 2*WALL_WIDTH, "#173F5F", "#173F5F"),
+      //Top
+      new Wall(-WALL_WIDTH, -WALL_WIDTH, board.width + 2*WALL_WIDTH, WALL_WIDTH*2, "#173F5F", "#173F5F"),
+      //Right
+      new Wall(board.width - WALL_WIDTH, -WALL_WIDTH, WALL_WIDTH*2, board.height+WALL_WIDTH*2, "#173F5F", "#173F5F"),
+      //Bottom
+      new Wall(-WALL_WIDTH, board.height - WALL_WIDTH, board.width+WALL_WIDTH*2, WALL_WIDTH*2, "#173F5F", "#173F5F")
+    ]
     // Timer
     this.timerLabel = new Entities.Label(20, 20, "00:00:00", board.ctx);
     this.timerLabel.fontSize = 15;
@@ -57,7 +56,8 @@ export class BouncingBallStep extends GameStep {
   }
 
   onEnter(data: any): void {
-    this.board.addEntities([this.wallLeft, this.wallBottom, this.wallTop, this.wallRight]);
+
+    this.board.addEntities(this.walls);
     let btnSize = { width: this.board.width / 3, height: 75};
     let start = new Entities.Button(this.board.width / 2 - btnSize.width / 2, this.board.height / 2 - btnSize.height / 2, btnSize.width, btnSize.height, "CLICK TO START");
     start.hoverFillColor = "black";
@@ -69,6 +69,17 @@ export class BouncingBallStep extends GameStep {
     })
     this.board.addEntity(start);
   }
+
+  /*start() {
+    this.board.changeCursor("none");
+    this.ennemies = [];
+    this.board.playSound("music");
+    this.createPlayerBall();
+    this.addEnnemy(100, 100, BALLS_SPEED.MAX, 360);
+    this.addEnnemy(this.board.width - 100, this.board.height - 100, BALLS_SPEED.MAX, 90);
+    this.elapsedMs = 0;
+    this.board.addEntity(this.timerLabel);
+  }*/
 
   start() {
     this.board.changeCursor("none");
@@ -84,20 +95,35 @@ export class BouncingBallStep extends GameStep {
       if (this.ennemies.length === MAX_ENNEMIES) {
         this.newEnnemyTimer.stop();
       }
-    });
+    }, true);
     this.elapsedMs = 0;
     this.board.addEntity(this.timerLabel);
   }
 
   private createPlayerBall() {
-    this.player = new Player(this.board.width / 2, this.board.height / 2, BALLS_RADIUS, BALLS_RADIUS, "#20639B", "#20639B");
+    this.player = new Player(this.board.width / 2, this.board.height / 2, BALLS_RADIUS);
     this.player.alive = true;
-    this.board.onMouseEvent("mousemove", (event, x, y) => {
-      if (this.player.alive && x > WALL_WIDTH && y > WALL_WIDTH) {
+    document.addEventListener("mousemove", (event: MouseEvent) => {
+      const rect = this.board.canvas.getBoundingClientRect();
+      let x = (event.clientX - rect.left) * (1/this.board.scale);
+      let y = (event.clientY - rect.top) * (1/this.board.scale);
+      x = x < WALL_WIDTH ? WALL_WIDTH : x;
+      x = x > this.board.width - WALL_WIDTH ? this.board.width - WALL_WIDTH : x;
+      y = y < WALL_WIDTH ? WALL_WIDTH : y;
+      y = y > this.board.height - WALL_WIDTH ? this.board.height - WALL_WIDTH : y;
+      if (this.player.alive) {
         this.player.x = x;
         this.player.y = y;
       }
     });
+    /*this.board.onMouseEvent("mousemove", (event, x, y) => {
+      this.mouseMovement.x = event.movementX;
+      this.mouseMovement.y = event.movementY;
+      if (this.player.alive && x > WALL_WIDTH && y > WALL_WIDTH) {
+        this.player.x = x;
+        this.player.y = y;
+      }
+    });*/
     this.board.onMouseEvent("mouseenter", () => {
       if (this.player.alive) {
         this.board.changeCursor("none");
@@ -107,70 +133,38 @@ export class BouncingBallStep extends GameStep {
       this.board.changeCursor("default");
     });
 
-    let playerOnbounds = (entity, collisionWith, result) => {
-      if (this.player.alive) {
-        this.player.x -= result.overlap * result.overlap_x;
-        this.player.y -= result.overlap * result.overlap_y;
-      }
-    };
-
-    this.player.onIntersectWithEntity(this.wallTop, playerOnbounds);
-    this.player.onIntersectWithEntity(this.wallBottom, playerOnbounds);
-    this.player.onIntersectWithEntity(this.wallLeft, playerOnbounds);
-    this.player.onIntersectWithEntity(this.wallRight, playerOnbounds);
-
     this.board.addEntity(this.player);
   }
 
-  addEnnemy() {
-    let ennemy = new Ennemy(BouncingBallStep.random(WALL_WIDTH+BALLS_RADIUS+10, this.board.width - BALLS_RADIUS-WALL_WIDTH-50), BouncingBallStep.random(WALL_WIDTH+BALLS_RADIUS+10, this.board.height - BALLS_RADIUS-WALL_WIDTH-50), BALLS_RADIUS, BALLS_RADIUS, "#ED553B", "#ED553B");
+  addEnnemy(x?: number, y?: number, speed?: number, angle?: number) {
+    let ennemy = new Ennemy(
+      x || BouncingBallStep.random(WALL_WIDTH+BALLS_RADIUS+10, this.board.width - BALLS_RADIUS-WALL_WIDTH-50),
+      y || BouncingBallStep.random(WALL_WIDTH+BALLS_RADIUS+10, this.board.height - BALLS_RADIUS-WALL_WIDTH-50),
+      BALLS_RADIUS);
     ennemy.stopped = true;
     this.board.addTimer(BALL_START_TIMER*1000, () => {
-      ennemy.setSpeedWithAngle(BouncingBallStep.random(BALLS_SPEED.MIN, BALLS_SPEED.MAX), BouncingBallStep.random(0, 359), true);
+      ennemy.setSpeedWithAngle(speed || BouncingBallStep.random(BALLS_SPEED.MIN, BALLS_SPEED.MAX), angle || BouncingBallStep.random(0, 359), true);
       ennemy.stopped = false;
+      console.log("New ball added: ", {angle: ennemy.angle, degrees: ennemy.angleInDegrees, speed: ennemy.speed, speedX: ennemy.speedX, speedY: ennemy.speedY});
     }, false);
-    console.log("New ball added: ", {angle: ennemy.angle, degrees: ennemy.angleInDegrees, speed: ennemy.speed, speedX: ennemy.speedX, speedY: ennemy.speedY});
     // Check ball collision
     ennemy.onIntersectWithAnyEntity((entity, collisionWith, result) => {
-
       // Wall collison
       if (collisionWith instanceof Wall) {
         if (this.player.alive) {
-          console.log("WALL");
-          this.board.playSound("wall");
-          ennemy.x -= result.overlap * result.overlap_x;
-          ennemy.y -= result.overlap * result.overlap_y;
-          let dot = ennemy.speedX * result.overlap_y + ennemy.speedY * -result.overlap_x
-
-          ennemy.speedX = 2 * dot * result.overlap_y - ennemy.speedX;
-          ennemy.speedY = 2 * dot * -result.overlap_x - ennemy.speedY;
+          ennemy.collisionWithWall(<Wall>collisionWith, result);
         }
       }
-
       // Other ennemy collision
       if (collisionWith instanceof Ennemy) {
-        if (ennemy.stopped || collisionWith.stopped) return ;
-        this.board.playSound("ball");
-        ennemy.x -= result.overlap * result.overlap_x;
-        ennemy.y -= result.overlap * result.overlap_y;
-        let dot = collisionWith.speedX * result.overlap_y + collisionWith.speedY * -result.overlap_x;
-
-        if (this.player.alive) {
-          collisionWith.speedX = 2 * dot * result.overlap_y - collisionWith.speedX;
+        if (!ennemy.stopped && !collisionWith.stopped) {
+          ennemy.collisionWithBall(<Ball>collisionWith, result);
         }
-        collisionWith.speedY = 2 * dot * -result.overlap_x - collisionWith.speedY;
       }
-
       // Player collision
       if (collisionWith instanceof Player && this.player.alive) {
         if (ennemy.stopped === false) {
-          this.board.playSound("ball");
-          ennemy.x -= result.overlap * result.overlap_x;
-          ennemy.y -= result.overlap * result.overlap_y;
-          let dot = ennemy.speedX * result.overlap_y + ennemy.speedY * -result.overlap_x
-
-          ennemy.speedX = 2 * dot * result.overlap_y - ennemy.speedX;
-          ennemy.speedY = 2 * dot * -result.overlap_x - ennemy.speedY;
+          ennemy.collisionWithBall(<Ball>collisionWith, result);
           this.playerLoose();
         }
       }
@@ -190,10 +184,6 @@ export class BouncingBallStep extends GameStep {
     this.newEnnemyTimer.stop();
     this.board.addTimer(3000, () => {
       this.board.changeCursor("default");
-      this.board.removeEntity(this.player);
-      for (const ennemy of this.ennemies) {
-        this.board.removeEntity(ennemy);
-      }
       this.timerLabel.text = "";
       // TOP 10
       let top10Container = new Entities.Container(0, 0, this.board.width, this.board.height / 3 * 2);
@@ -228,6 +218,10 @@ export class BouncingBallStep extends GameStep {
       restart.hoverFontColor = "white";
       restart.onMouseEvent("click", () => {
         this.board.removeEntities([score, restart, top10Container]);
+        this.board.removeEntity(this.player);
+        for (const ennemy of this.ennemies) {
+          this.board.removeEntity(ennemy);
+        }
         this.start();
       });
       this.board.addEntity(restart);
@@ -277,12 +271,12 @@ export class BouncingBallStep extends GameStep {
         if (name === ""|| name === null) return;
         name = name.slice(0, 10);
         return this.getClientIp().then((ip: any) => {
-          console.log("ip: ", ip);
+          //console.log("ip: ", ip);
           this.scores.splice(rank-1, 0 , {
             balls: balls,
             timestamp: (new Date()).getMilliseconds(),
             duration: time,
-            ip: ip.ip,
+            //ip: ip.ip,
             name: name,
             user_agent: navigator.userAgent
           });
@@ -357,6 +351,8 @@ export class BouncingBallStep extends GameStep {
   update(delta: number) {
     super.update(delta);
     if (this.player && this.player.alive) {
+      this.player.movementSpeedX = this.mouseMovement.x > 0 ? BALLS_SPEED.MIN : -BALLS_SPEED.MIN;
+      this.player.movementSpeedY = this.mouseMovement.y > 0 ? BALLS_SPEED.MIN : -BALLS_SPEED.MIN;
       this.elapsedMs += delta;
       this.timerLabel.text = this.formatMilliseconds(this.elapsedMs, true) + " | " + this.ennemies.length + " BALLS";
     }

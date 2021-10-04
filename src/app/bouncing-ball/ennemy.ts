@@ -1,23 +1,17 @@
-import {Entities} from '@fuwu-yuan/bgew'
+import {Ball} from "./Ball";
+import {Result} from '@fuwu-yuan/bgew'
+import {Wall} from "./wall";
 
-export class Ennemy extends Entities.Oval {
+const IMAGE = "./assets/bouncing-ball/images/red_ball.png";
+
+export class Ennemy extends Ball {
 
   private _stopped = false;
-  private _image: HTMLImageElement;
 
   constructor(x: number,
               y: number,
-              radiusX: number,
-              radiusY: number,
-              strokeColor: string|null = null,
-              fillColor: string|null = null,
-              hoverStrokeColor: string|null = null,
-              hoverFillColor: string|null = null,
-              clickStrokeColor: string|null = null,
-              clickFillColor: string|null = null) {
-    super(x, y, radiusX, radiusY, strokeColor, fillColor, hoverStrokeColor, hoverFillColor, clickStrokeColor, clickFillColor);
-    this._image = document.createElement("img");
-    this._image.src = "./assets/bouncing-ball/images/red_ball.png";
+              radius) {
+    super(x, y, radius, "#ED553B", IMAGE);
   }
 
   draw(ctx: CanvasRenderingContext2D) {

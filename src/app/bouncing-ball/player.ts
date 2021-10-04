@@ -1,23 +1,33 @@
-import {Entities} from '@fuwu-yuan/bgew'
+import {Ball} from "./Ball";
+import {Wall} from "./wall";
+import {Result, Entity} from '@fuwu-yuan/bgew'
+import {Ennemy} from "./ennemy";
 
-export class Player extends Entities.Oval {
+const IMAGE = "./assets/bouncing-ball/images/blue_ball.png";
+
+export class Player extends Ball {
 
   private _alive = true;
-  private _image: HTMLImageElement;
+
+  public movementSpeedX: number = 0;
+  public movementSpeedY: number = 0;
 
   constructor(x: number,
               y: number,
-              radiusX: number,
-              radiusY: number,
-              strokeColor: string|null = null,
-              fillColor: string|null = null,
-              hoverStrokeColor: string|null = null,
-              hoverFillColor: string|null = null,
-              clickStrokeColor: string|null = null,
-              clickFillColor: string|null = null) {
-    super(x, y, radiusX, radiusY, strokeColor, fillColor, hoverStrokeColor, hoverFillColor, clickStrokeColor, clickFillColor);
-    this._image = document.createElement("img");
-    this._image.src = "./assets/bouncing-ball/images/blue_ball.png";
+              radius: number) {
+    super(x, y, radius, "#20639B", IMAGE);
+    this.onIntersectWithAnyEntity((entity: Entity, collisionWith: Entity, result: Result) => {
+      if (collisionWith instanceof Wall) {
+        if (this.alive) {
+          this.x -= result.overlap * result.overlap_x;
+          this.y -= result.overlap * result.overlap_y;
+        }
+      }
+      if (collisionWith instanceof Ball)
+        if (collisionWith instanceof Ennemy && !(collisionWith as Ennemy).stopped) {
+          this.collisionWithBall(<Ball>collisionWith, result);
+      }
+    });
   }
 
   draw(ctx: CanvasRenderingContext2D) {

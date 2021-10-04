@@ -4,5 +4,5 @@ export interface Score {
   duration: number,
   timestamp: number,
   user_agent: string,
-  ip: string
+  ip?: string
 }
