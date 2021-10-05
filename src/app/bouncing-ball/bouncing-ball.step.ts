@@ -7,12 +7,17 @@ import {Score} from "./score";
 import {environment} from '../../environments/environment';
 import {Ball} from "./Ball";
 
-const WALL_WIDTH = 10;
-const BALLS_RADIUS = 20;
-const BALL_START_TIMER = 3; //ms
-const BALLS_SPEED = { MIN: 100, MAX: 300};
-const NEW_BALL_TIMER = 10; // seconds
-const MAX_ENNEMIES = 25;
+const DEFAULT_CANVAS_SIZE = {
+  WIDTH: 900,
+  HEIGHT: 900
+};
+
+let WALL_WIDTH = 10;
+let BALLS_RADIUS = 20;
+let BALL_START_TIMER = 3; //ms
+let BALLS_SPEED = { MIN: 100, MAX: 300};
+let NEW_BALL_TIMER = 10; // seconds
+let MAX_ENNEMIES = 25;
 
 export class BouncingBallStep extends GameStep {
   name: string = "bouncing-ball";
@@ -24,11 +29,18 @@ export class BouncingBallStep extends GameStep {
   private timerLabel: Entities.Label;
   private restInCloudApi: RestInCloudAPI;
   private scores?: Score[] = [];
-  private bestScore;
+  private bestScore: Entities.Label;
   private mouseMovement : {x: number, y: number} = {x: 0, y: 0};
+  private previousTouch: Touch;
 
   constructor(board: Board) {
     super(board);
+    // Mobile/tablet fullscreen resize
+    if (this.deviceType() === "tablet" || this.deviceType() === "mobile") {
+      this.updateRatio();
+      environment.restincloud_api_scores_key = environment.restincloud_api_scores_key + "-mobile";
+    }
+
     this.walls = [
       //Left
       new Wall(-WALL_WIDTH, -WALL_WIDTH, WALL_WIDTH*2, board.height + 2*WALL_WIDTH, "#173F5F", "#173F5F"),
@@ -55,11 +67,30 @@ export class BouncingBallStep extends GameStep {
     this.updateScores().then(() => { this.updateBest(); });
   }
 
+  updateRatio() {
+    this.board.width = screen.width;
+
+    let ratio = this.board.width / DEFAULT_CANVAS_SIZE.WIDTH;
+
+    this.board.height = DEFAULT_CANVAS_SIZE.HEIGHT*ratio;
+    WALL_WIDTH = 10*ratio;
+    BALLS_RADIUS = 20*ratio;
+    BALLS_SPEED.MAX = BALLS_SPEED.MAX*(1-((1-ratio)/2));
+    BALLS_SPEED.MIN = BALLS_SPEED.MIN*(1-((1-ratio)/2));
+  }
+
   onEnter(data: any): void {
 
-    this.board.addEntities(this.walls);
     let btnSize = { width: this.board.width / 3, height: 75};
-    let start = new Entities.Button(this.board.width / 2 - btnSize.width / 2, this.board.height / 2 - btnSize.height / 2, btnSize.width, btnSize.height, "CLICK TO START");
+    if (this.deviceType() === "mobile") {
+      btnSize.width = this.board.width/2;
+    }
+    let start = new Entities.Button(
+      this.board.width / 2 - btnSize.width / 2,
+      this.board.height / 2 - btnSize.height / 2,
+      btnSize.width,
+      btnSize.height,
+      "CLICK TO START");
     start.hoverFillColor = "black";
     start.hoverStrokeColor = "white";
     start.hoverFontColor = "white";
@@ -70,18 +101,44 @@ export class BouncingBallStep extends GameStep {
     this.board.addEntity(start);
   }
 
-  /*start() {
-    this.board.changeCursor("none");
-    this.ennemies = [];
-    this.board.playSound("music");
-    this.createPlayerBall();
-    this.addEnnemy(100, 100, BALLS_SPEED.MAX, 360);
-    this.addEnnemy(this.board.width - 100, this.board.height - 100, BALLS_SPEED.MAX, 90);
-    this.elapsedMs = 0;
-    this.board.addEntity(this.timerLabel);
-  }*/
+  deviceType = () => {
+    const ua = navigator.userAgent;
+    if (/(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(ua)) {
+      return "tablet";
+    }
+    else if (/Mobile|Android|iP(hone|od)|IEMobile|BlackBerry|Kindle|Silk-Accelerated|(hpw|web)OS|Opera M(obi|ini)/.test(ua)) {
+      return "mobile";
+    }
+    return "desktop";
+  };
+
+  deviceName = (useragent: string = navigator.userAgent) => {
+    let device = "Unknown";
+    const ua = {
+      "Generic Linux": /Linux/i,
+      "Android": /Android/i,
+      "BlackBerry": /BlackBerry/i,
+      "Bluebird": /EF500/i,
+      "Chrome OS": /CrOS/i,
+      "Datalogic": /DL-AXIS/i,
+      "Honeywell": /CT50/i,
+      "iPad": /iPad/i,
+      "iPhone": /iPhone/i,
+      "iPod": /iPod/i,
+      "macOS": /Macintosh/i,
+      "Windows": /IEMobile|Windows/i,
+      "Zebra": /TC70|TC55/i,
+    }
+    Object.keys(ua).map(v => useragent.match(ua[v]) && (device = v));
+    return device;
+  }
 
   start() {
+    if (this.deviceType() === "tablet" || this.deviceType() === "mobile") {
+      this.updateRatio();
+    }
+    this.board.addEntities(this.walls);
+
     this.board.changeCursor("none");
     this.ennemies = [];
     this.board.playSound("music");
@@ -98,15 +155,17 @@ export class BouncingBallStep extends GameStep {
     }, true);
     this.elapsedMs = 0;
     this.board.addEntity(this.timerLabel);
+
+    if (this.deviceType() !== "desktop") {
+      this.bestScore.text = "";
+    }
   }
 
   private createPlayerBall() {
     this.player = new Player(this.board.width / 2, this.board.height / 2, BALLS_RADIUS);
     this.player.alive = true;
-    document.addEventListener("mousemove", (event: MouseEvent) => {
-      const rect = this.board.canvas.getBoundingClientRect();
-      let x = (event.clientX - rect.left) * (1/this.board.scale);
-      let y = (event.clientY - rect.top) * (1/this.board.scale);
+
+    let playerInputMove = (x: number, y: number) => {
       x = x < WALL_WIDTH ? WALL_WIDTH : x;
       x = x > this.board.width - WALL_WIDTH ? this.board.width - WALL_WIDTH : x;
       y = y < WALL_WIDTH ? WALL_WIDTH : y;
@@ -115,7 +174,33 @@ export class BouncingBallStep extends GameStep {
         this.player.x = x;
         this.player.y = y;
       }
+    }
+
+    document.addEventListener("mousemove", (event: MouseEvent) => {
+      const rect = this.board.canvas.getBoundingClientRect();
+      let x = (event.clientX - rect.left) * (1/this.board.scale);
+      let y = (event.clientY - rect.top) * (1/this.board.scale);
+      playerInputMove(x, y);
     });
+
+    document.addEventListener("touchmove", (event: TouchEvent) => {
+      const rect = this.board.canvas.getBoundingClientRect();
+      if (this.previousTouch) {
+        let movementX = event.touches.item(0).pageX - this.previousTouch.pageX;
+        let movementY = event.touches.item(0).pageY - this.previousTouch.pageY;
+        //let x = (event.touches.item(0).clientX - rect.left) * (1/this.board.scale);
+        //let y = (event.touches.item(0).clientY - rect.top) * (1/this.board.scale);
+        let x = this.player.x + movementX;
+        let y = this.player.y + movementY;
+        playerInputMove(x, y);
+      }
+      this.previousTouch = event.touches.item(0);
+    });
+
+    document.addEventListener("touchend", () => {
+      this.previousTouch = null;
+    });
+
     /*this.board.onMouseEvent("mousemove", (event, x, y) => {
       this.mouseMovement.x = event.movementX;
       this.mouseMovement.y = event.movementY;
@@ -177,6 +262,7 @@ export class BouncingBallStep extends GameStep {
   private playerLoose() {
     this.board.stopSound("music", true, 2000);
     this.player.alive = false;
+    this.board.removeEntities(this.walls);
     /*this.player.angleInDegrees = 90;
     for (const ennemy of this.ennemies) {
       ennemy.angleInDegrees = 90;
@@ -187,20 +273,24 @@ export class BouncingBallStep extends GameStep {
       this.timerLabel.text = "";
       // TOP 10
       let top10Container = new Entities.Container(0, 0, this.board.width, this.board.height / 3 * 2);
+      let bottomPart = new Entities.Container(0, top10Container.y + top10Container.height, this.board.width, this.board.height / 3);
       top10Container.addEntity(new Entities.Rectangle(0, 0, top10Container.width, top10Container.height, "black", "transparent"));
-      let top10Title = new Entities.Label(0, 50, "TOP 10", this.board.ctx);
-      top10Title.x = top10Container.width / 2 - top10Title.width / 2;
+      let top10Title = new Entities.Label(0, 50, "TOP 10" + (this.deviceType() === "desktop" ? " (DESKTOP)" : " (MOBILE)"), this.board.ctx);
       top10Title.fontSize = 30;
+      top10Title.x = top10Container.width / 2 - top10Title.width / 2;
       top10Container.addEntity(top10Title);
 
       this.addScore(this.elapsedMs, this.ennemies.length).then(() => {
         let top10values = this.scores.map((s: Score) => {
-          return `[${s.name}] ${this.formatMilliseconds(s.duration, true)} | ${s.balls} BALLS`;
+          return `[${s.name}] ${this.formatMilliseconds(s.duration, true)} (${this.deviceName(s.user_agent)}) | ${s.balls} BALLS`;
         });
         let firstLabel = null;
         let medals = ["🥇 ", "🥈 ", "🥉 ", "4. ", "5. ", "6. ", "7. ", "8. ", "9. ", "10. "];
         for (let i = 0; i < top10values.length; i++) {
           let top10Label = new Entities.Label(10, top10Title.y + top10Title.height + 50 + 30*i, medals[i] + top10values[i], this.board.ctx);
+          if (this.deviceType() === "mobile") {
+            top10Label.fontSize = 15;
+          }
           top10Label.x = this.board.width / 2 - top10Label.width / 2;
           if (firstLabel) top10Label.x = firstLabel.x;
           top10Container.addEntity(top10Label);
@@ -212,26 +302,28 @@ export class BouncingBallStep extends GameStep {
 
       // RESTART
       let btnSize = { width: 200, height: 50 };
-      let restart = new Entities.Button(this.board.width / 2 - btnSize.width / 2, this.board.height - btnSize.height - 50, btnSize.width, btnSize.height, "Try again");
+      let restart = new Entities.Button(bottomPart.width / 2 - btnSize.width / 2, bottomPart.height / 3 * 2 - btnSize.height / 2, btnSize.width, btnSize.height, "Try again");
       restart.hoverFillColor = "black";
       restart.hoverStrokeColor = "white";
       restart.hoverFontColor = "white";
       restart.onMouseEvent("click", () => {
-        this.board.removeEntities([score, restart, top10Container]);
+        this.board.removeEntities([bottomPart, top10Container]);
         this.board.removeEntity(this.player);
         for (const ennemy of this.ennemies) {
           this.board.removeEntity(ennemy);
         }
         this.start();
       });
-      this.board.addEntity(restart);
+      bottomPart.addEntity(restart)
 
       // SCORE
       let score = new Entities.Label(0, 0, "Score: " + this.formatMilliseconds(this.elapsedMs, true) + " | " + this.ennemies.length + " BALLS", this.board.ctx);
       score.fontSize = 25;
-      score.x = this.board.width / 2 - score.width / 2;
-      score.y = restart.y - restart.height - score.height - 50;
-      this.board.addEntity(score);
+      score.x = bottomPart.width / 2 - score.width / 2;
+      score.y = bottomPart.height / 3 - btnSize.height / 2;
+      bottomPart.addEntity(score);
+
+      this.board.addEntity(bottomPart);
     }, false);
   }
 
@@ -243,11 +335,13 @@ export class BouncingBallStep extends GameStep {
           this.scores = this.scores.sort((a, b) => {
             return b.duration - a.duration;
           });
-          console.log("Scores uodated: ", this.scores);
+          console.log("Scores updated: ", this.scores);
         }else if (value.code === "not_found") {
           this.scores = [];
+          console.log("Scores not found in server.");
         }else {
           this.scores = null;
+          console.log(value.code);
         }
       }).catch(err => {
       });
@@ -360,6 +454,10 @@ export class BouncingBallStep extends GameStep {
       this.player.speedY += 5;
       for (const ennemy of this.ennemies) {
         ennemy.speedY += 5;
+      }
+
+      if (this.player && !this.player.alive && this.deviceType() === "mobile" && this.board.height < screen.height) {
+        this.board.height += (screen.height - this.board.height)/50;
       }
     }
   }
