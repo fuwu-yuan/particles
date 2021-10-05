@@ -3,25 +3,25 @@
   "name": "Particles - Don't touch red balls! | BGEW Game",
   "icons": [
     {
-        "src": "/particles/assets/icons/android-chrome-192x192.png",
+        "src": "assets/icons/android-chrome-192x192.png",
         "sizes": "192x192",
         "type": "image/png"
     },
     {
-        "src": "/particles/assets/icons/android-chrome-256x256.png",
+        "src": "assets/icons/android-chrome-256x256.png",
         "sizes": "256x256",
         "type": "image/png"
     },
     {
-      "src": "/particles/assets/icons/android-chrome-512x512.png",
+      "src": "assets/icons/android-chrome-512x512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
   ],
-  "start_url": "/?source=pwa",
+  "start_url": "/particles?source=pwa",
   "background_color": "#FFFFFF",
   "display": "fullscreen",
-  "scope": "/",
+  "scope": "/particles",
   "theme_color": "#2C58FA",
   "__shortcuts__": [
     {
@@ -42,7 +42,7 @@
   "description": "Don't touch red balls!",
   "screenshots": [
     {
-      "src": "/particles/assets/og/image.jpg",
+      "src": "assets/og/image.jpg",
       "type": "image/jpg",
       "sizes": "1200x627"
     }
