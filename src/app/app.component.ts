@@ -27,6 +27,15 @@ export class AppComponent implements OnInit {
       console.log = () => {}; // Silent is gold
     }
     this.initMeta();
+    this.initOffline();
+  }
+
+  private initOffline() {
+    window.addEventListener("load", () => {
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("service-worker.js");
+      }
+    });
   }
 
   private initMeta() {
