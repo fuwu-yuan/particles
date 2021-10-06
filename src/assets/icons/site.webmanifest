@@ -18,7 +18,7 @@
       "type": "image/png"
     }
   ],
-  "start_url": "/particles?source=pwa",
+  "start_url": "/particles/?source=pwa",
   "background_color": "#FFFFFF",
   "display": "fullscreen",
   "scope": "/particles/",
