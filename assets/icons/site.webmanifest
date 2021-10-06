@@ -21,7 +21,7 @@
   "start_url": "/particles?source=pwa",
   "background_color": "#FFFFFF",
   "display": "fullscreen",
-  "scope": "/particles",
+  "scope": "/particles/",
   "theme_color": "#2C58FA",
   "__shortcuts__": [
     {
