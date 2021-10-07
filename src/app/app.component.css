@@ -43,3 +43,136 @@ footer a {
 footer a.share-social {
   margin-left: 10px;
 }
+
+/* Install banner */
+.clearfix {
+  zoom: 1;
+}
+.clearfix:before, .clearfix:after {
+  content: " ";
+  display: table;
+}
+.clearfix:after {
+  clear: both;
+}
+.smart-banner {
+  zoom: 1;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -ms-box-sizing: border-box;
+  -o-box-sizing: border-box;
+  box-sizing: border-box;
+  background: #d1d1d1;
+  background: -webkit-gradient(linear,left bottom,left top,color-stop(0,#d1d1d1),color-stop(1,#f8f8f8));
+  background: -ms-linear-gradient(bottom,#d1d1d1,#f8f8f8);
+  background: -moz-linear-gradient(bottom,#d1d1d1 0%,#f8f8f8 100%);
+  padding: 10px 10px 10px 31px;
+  position: relative;
+  -webkit-transition: margin-top .3s linear;
+}
+.smart-banner:before, .smart-banner:after {
+  content: " ";
+  display: table;
+}
+.smart-banner:after {
+  clear: both;
+}
+.smart-banner.closed {
+  margin-top: -100%;
+}
+.smart-banner .meta {
+  float: left;
+  padding-top: 7px;
+}
+.smart-banner .name {
+  font-size: 12px;
+  width: 163px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  white-space: nowrap;
+}
+.smart-banner .author {
+  display: block;
+  font-size: 11px;
+  color: #888;
+  padding-top: 2px;
+}
+.smart-banner .icon {
+  height: 50px;
+  width: 50px;
+  border-radius: 7px;
+  vertical-align: top;
+  box-shadow: 0 1px 3px black;
+  float: left;
+  margin: 0 10px;
+}
+.smart-banner .close {
+  position: absolute;
+  width: 30px;
+  padding: 25px 0;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  vertical-align: middle;
+  text-align: center;
+  text-decoration: none;
+  color: rgba(0,0,0,0.3);
+}
+.smart-banner .btn {
+  text-decoration: none;
+  margin-top: 10px;
+  float: right;
+  color: white;
+  padding: 2px 9px 5px 9px;
+  font-family: 'Helvetica Neue', Helvetica, sans-serif;
+  font-weight: bold;
+  font-size: 12px;
+  -webkit-border-radius: 4px;
+  border-radius: 4px;
+  background: #303030;
+  background: -webkit-gradient(linear,left bottom,left top,color-stop(0,#303030),color-stop(1,#838383));
+  background: -ms-linear-gradient(bottom,#303030,#838383);
+  background: -moz-linear-gradient(bottom,#303030 0%,#838383 100%);
+  border: solid 1px rgba(79,79,79,0.75);
+}
+
+/* Install helpers */
+#pwa-install-helpers > * {
+  display: none;
+  z-index: 1000;
+}
+
+#pwa-install-helpers .ios {
+  color: white;
+  background: #6290C3;
+  text-align: center;
+  padding: 10px 10px 10px 20px;
+  position: absolute;
+  bottom: 0;
+  margin-bottom: 20px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+#pwa-install-helpers .ios .close {
+  text-decoration: none;
+  position: absolute;
+  left: 10px;
+  color: lightgray;
+  font-size: 16px;
+  line-height: 16px;
+}
+
+#pwa-install-helpers .ios:after {
+  content:'';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -20px;
+  width: 0;
+  height: 0;
+  border-top: solid 20px #6290C3;
+  border-left: solid 20px transparent;
+  border-right: solid 20px transparent;
+}

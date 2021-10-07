@@ -6,6 +6,7 @@ import {Meta, Title} from '@angular/platform-browser';
 import {Board} from "@fuwu-yuan/bgew";
 import {BouncingBallStep} from "./bouncing-ball/bouncing-ball.step";
 import {environment} from "../environments/environment"
+import {Plateform} from "./helpers/plateform";
 
 @Component({
   selector: 'app-root',
@@ -68,4 +69,26 @@ export class AppComponent implements OnInit {
     return `${this.title} v${version}`;
   }
 
+  closeBanner(event: MouseEvent) {
+      event.preventDefault();
+      var smartBanner = document.getElementById("smart-banner");
+      smartBanner.style.marginTop = (0 - smartBanner.clientHeight)+"px";
+  }
+
+  showInstallHelper(event: MouseEvent) {
+    event.preventDefault();
+    var helper = document.querySelector("#pwa-install-helpers .ios") as HTMLElement;
+    helper.style.display = "block";
+    this.closeBanner(event);
+  }
+
+  closeHelper(event: MouseEvent, plateform: string) {
+    event.preventDefault();
+    var helper = document.querySelector("#pwa-install-helpers ." + plateform) as HTMLElement;
+    helper.style.display = "none";
+  }
+
+  get isIos() {
+    return ["iPad", "iPod", "iPhone"].indexOf(Plateform.deviceName()) > -1;
+  }
 }
