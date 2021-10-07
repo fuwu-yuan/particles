@@ -155,8 +155,8 @@ export class BouncingBallStep extends GameStep {
     document.addEventListener("touchmove", (event: TouchEvent) => {
       const rect = this.board.canvas.getBoundingClientRect();
       if (this.previousTouch) {
-        let movementX = event.touches.item(0).pageX - this.previousTouch.pageX;
-        let movementY = event.touches.item(0).pageY - this.previousTouch.pageY;
+        let movementX = (event.touches.item(0).pageX - this.previousTouch.pageX)*2; //x2 to speed up touch movement
+        let movementY = (event.touches.item(0).pageY - this.previousTouch.pageY)*2;
         //let x = (event.touches.item(0).clientX - rect.left) * (1/this.board.scale);
         //let y = (event.touches.item(0).clientY - rect.top) * (1/this.board.scale);
         let x = this.player.x + movementX;
