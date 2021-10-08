@@ -55,7 +55,7 @@ footer a.share-social {
 .clearfix:after {
   clear: both;
 }
-@media all and (display-mode: standalone) {
+@media all and (display-mode: fullscreen) {
   .smart-banner {
     display: none !important;
   }
