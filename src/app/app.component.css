@@ -55,6 +55,11 @@ footer a.share-social {
 .clearfix:after {
   clear: both;
 }
+@media all and (display-mode: standalone) {
+  .smart-banner {
+    display: none !important;
+  }
+}
 .smart-banner {
   zoom: 1;
   -webkit-box-sizing: border-box;
