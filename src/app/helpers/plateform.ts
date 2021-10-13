@@ -28,6 +28,7 @@ export class Plateform {
       "Zebra": /TC70|TC55/i,
     };
     Object.keys(ua).map(v => useragent.match(ua[v]) && (device = <DeviceName>v));
+    alert(useragent);
     return device;
   }
 }
