@@ -4,9 +4,9 @@ import { faMailBulk } from "@fortawesome/free-solid-svg-icons";
 import {version, repository, name, author, keywords, description, config} from '../../package.json';
 import {Meta, Title} from '@angular/platform-browser';
 import {Board} from "@fuwu-yuan/bgew";
-import {BouncingBallStep} from "./bouncing-ball/bouncing-ball.step";
+import {BouncingBallStep} from "./game/bouncing-ball.step";
 import {environment} from "../environments/environment"
-import {Plateform} from "./helpers/plateform";
+import {Plateform} from "./game/helpers/plateform";
 
 @Component({
   selector: 'app-root',
@@ -22,12 +22,39 @@ export class AppComponent implements OnInit {
   faMailBulk = faMailBulk;
   name = name;
   sources = repository.url;
+  images: string[];
 
   constructor(private metatitle: Title, private meta: Meta) {
+
+
+
     if (environment.production) {
       console.log = () => {}; // Silent is gold
     }
     this.initMeta();
+    this.preloadImages();
+  }
+
+  private preloadImages() {
+    this.images = [
+      /* Balls */
+      "src/assets/bouncing-ball/images/balls/blue_ball.png",
+      "src/assets/bouncing-ball/images/balls/green_ball.png",
+      "src/assets/bouncing-ball/images/balls/purple_ball.png",
+      "src/assets/bouncing-ball/images/balls/red_ball.png",
+      "src/assets/bouncing-ball/images/balls/yellow_ball.png",
+      /* Bonus */
+      "src/assets/bouncing-ball/images/bonus/BigBall.png",
+      "src/assets/bouncing-ball/images/bonus/InvControl.png",
+      "src/assets/bouncing-ball/images/bonus/Invisible.png",
+      "src/assets/bouncing-ball/images/bonus/Invulnerable.png",
+      "src/assets/bouncing-ball/images/bonus/NoBorders.png",
+      "src/assets/bouncing-ball/images/bonus/Random.png",
+      "src/assets/bouncing-ball/images/bonus/Revive.png",
+      "src/assets/bouncing-ball/images/bonus/Rockets.png",
+      "src/assets/bouncing-ball/images/bonus/Shield.png",
+      "src/assets/bouncing-ball/images/bonus/Speed.png"
+    ];
   }
 
   private initMeta() {
