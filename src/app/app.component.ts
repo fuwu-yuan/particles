@@ -6,7 +6,7 @@ import {Meta, Title} from '@angular/platform-browser';
 import {Board} from "@fuwu-yuan/bgew";
 import {BouncingBallStep} from "./bouncing-ball/bouncing-ball.step";
 import {environment} from "../environments/environment"
-import {Plateform} from "./helpers/plateform";
+import * as DeviceDetector from "device-detector-js";
 
 @Component({
   selector: 'app-root',
@@ -22,11 +22,14 @@ export class AppComponent implements OnInit {
   faMailBulk = faMailBulk;
   name = name;
   sources = repository.url;
+  private device: DeviceDetector.DeviceDetectorResult;
 
   constructor(private metatitle: Title, private meta: Meta) {
     if (environment.production) {
       console.log = () => {}; // Silent is gold
     }
+    const deviceDetector = new DeviceDetector();
+    this.device = deviceDetector.parse(navigator.userAgent);
     this.initMeta();
   }
 
@@ -89,6 +92,6 @@ export class AppComponent implements OnInit {
   }
 
   get isIos() {
-    return ["iPad", "iPod", "iPhone"].indexOf(Plateform.deviceName()) > -1;
+    return this.device.os.name === "iOS";
   }
 }
