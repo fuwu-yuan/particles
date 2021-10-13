@@ -13,12 +13,19 @@ const DEFAULT_CANVAS_SIZE = {
   HEIGHT: 900
 };
 
-let WALL_WIDTH = 10;
-let BALLS_RADIUS = 20;
-let BALL_START_TIMER = 3; //ms
-let BALLS_SPEED = { MIN: 100, MAX: 300};
-let NEW_BALL_TIMER = 10; // seconds
-let MAX_ENNEMIES = 25;
+const DEFAULT_WALL_WIDTH = 10;
+const DEFAULT_BALLS_RADIUS = 20;
+const DEFAULT_BALL_START_TIMER = 3; //ms
+const DEFAULT_BALLS_SPEED = { MIN: 100, MAX: 300};
+const DEFAULT_NEW_BALL_TIMER = 10; // seconds
+const DEFAULT_MAX_ENNEMIES = 25;
+
+let WALL_WIDTH = DEFAULT_WALL_WIDTH;
+let BALLS_RADIUS = DEFAULT_BALLS_RADIUS;
+let BALL_START_TIMER = DEFAULT_BALL_START_TIMER;
+let BALLS_SPEED = DEFAULT_BALLS_SPEED;
+let NEW_BALL_TIMER = DEFAULT_NEW_BALL_TIMER;
+let MAX_ENNEMIES = DEFAULT_MAX_ENNEMIES;
 
 export class BouncingBallStep extends GameStep {
   name: string = "bouncing-ball";
@@ -33,11 +40,14 @@ export class BouncingBallStep extends GameStep {
   private bestScore: Entities.Label;
   private mouseMovement : {x: number, y: number} = {x: 0, y: 0};
   private previousTouch: Touch;
+  private deviceType;
 
   constructor(board: Board) {
     super(board);
+    this.deviceType = Plateform.deviceType();
+    alert(this.deviceType);
     // Mobile/tablet fullscreen resize
-    if (Plateform.deviceType() === "tablet" || Plateform.deviceType() === "mobile") {
+    if (this.deviceType === "tablet" || this.deviceType === "mobile") {
       this.updateRatio();
       environment.restincloud_api_scores_key = environment.restincloud_api_scores_key + "-mobile";
     }
@@ -74,16 +84,16 @@ export class BouncingBallStep extends GameStep {
     let ratio = this.board.width / DEFAULT_CANVAS_SIZE.WIDTH;
 
     this.board.height = DEFAULT_CANVAS_SIZE.HEIGHT*ratio;
-    WALL_WIDTH = 10*ratio;
-    BALLS_RADIUS = 20*ratio;
-    BALLS_SPEED.MAX = BALLS_SPEED.MAX*(1-((1-ratio)/2));
-    BALLS_SPEED.MIN = BALLS_SPEED.MIN*(1-((1-ratio)/2));
+    WALL_WIDTH = DEFAULT_WALL_WIDTH*ratio;
+    BALLS_RADIUS = DEFAULT_BALLS_RADIUS*ratio;
+    BALLS_SPEED.MAX = DEFAULT_BALLS_SPEED.MAX*(1-((1-ratio)/2));
+    BALLS_SPEED.MIN = DEFAULT_BALLS_SPEED.MIN*(1-((1-ratio)/2));
   }
 
   onEnter(data: any): void {
 
     let btnSize = { width: this.board.width / 3, height: 75};
-    if (Plateform.deviceType() === "mobile") {
+    if (this.deviceType === "mobile") {
       btnSize.width = this.board.width/2;
     }
     let start = new Entities.Button(
@@ -103,7 +113,7 @@ export class BouncingBallStep extends GameStep {
   }
 
   start() {
-    if (Plateform.deviceType() === "tablet" || Plateform.deviceType() === "mobile") {
+    if (this.deviceType === "tablet" || this.deviceType === "mobile") {
       this.updateRatio();
     }
     this.board.addEntities(this.walls);
@@ -125,7 +135,7 @@ export class BouncingBallStep extends GameStep {
     this.elapsedMs = 0;
     this.board.addEntity(this.timerLabel);
 
-    if (Plateform.deviceType() !== "desktop") {
+    if (this.deviceType !== "desktop") {
       this.bestScore.text = "";
     }
   }
@@ -244,7 +254,7 @@ export class BouncingBallStep extends GameStep {
       let top10Container = new Entities.Container(0, 0, this.board.width, this.board.height / 3 * 2);
       let bottomPart = new Entities.Container(0, top10Container.y + top10Container.height, this.board.width, this.board.height / 3);
       top10Container.addEntity(new Entities.Rectangle(0, 0, top10Container.width, top10Container.height, "black", "transparent"));
-      let top10Title = new Entities.Label(0, 50, "TOP 10" + (Plateform.deviceType() === "desktop" ? " (DESKTOP)" : " (MOBILE)"), this.board.ctx);
+      let top10Title = new Entities.Label(0, 50, "TOP 10" + (this.deviceType === "desktop" ? " (DESKTOP)" : " (MOBILE)"), this.board.ctx);
       top10Title.fontSize = 30;
       top10Title.x = top10Container.width / 2 - top10Title.width / 2;
       top10Container.addEntity(top10Title);
@@ -257,7 +267,7 @@ export class BouncingBallStep extends GameStep {
         let medals = ["🥇 ", "🥈 ", "🥉 ", "4. ", "5. ", "6. ", "7. ", "8. ", "9. ", "10. "];
         for (let i = 0; i < top10values.length; i++) {
           let top10Label = new Entities.Label(10, top10Title.y + top10Title.height + 50 + 30*i, medals[i] + top10values[i], this.board.ctx);
-          if (Plateform.deviceType() === "mobile") {
+          if (this.deviceType === "mobile") {
             top10Label.fontSize = 15;
           }
           top10Label.x = this.board.width / 2 - top10Label.width / 2;
@@ -425,7 +435,7 @@ export class BouncingBallStep extends GameStep {
         ennemy.speedY += 5;
       }
 
-      if (this.player && !this.player.alive && Plateform.deviceType() === "mobile" && this.board.height < screen.height) {
+      if (this.player && !this.player.alive && this.deviceType === "mobile" && this.board.height < screen.height) {
         this.board.height += (screen.height - this.board.height)/50;
       }
     }
