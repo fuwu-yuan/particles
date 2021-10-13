@@ -3,8 +3,7 @@ export class Plateform {
     const ua = navigator.userAgent;
     if (/(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(ua)) {
       return "tablet";
-    }
-    else if (/Mobile|Android|iP(hone|od)|IEMobile|BlackBerry|Kindle|Silk-Accelerated|(hpw|web)OS|Opera M(obi|ini)/.test(ua)) {
+    } else if (/Mobile|Android|iP(hone|od)|IEMobile|BlackBerry|Kindle|Silk-Accelerated|(hpw|web)OS|Opera M(obi|ini)/.test(ua)) {
       return "mobile";
     }
     return "desktop";
@@ -28,7 +27,13 @@ export class Plateform {
       "Zebra": /TC70|TC55/i,
     };
     Object.keys(ua).map(v => useragent.match(ua[v]) && (device = <DeviceName>v));
-    alert(useragent);
+    // @ts-ignore
+    if (device === "macOS") {
+      // Check if Apple lie on iPad OS faking useragent with Macintosh
+      if (navigator.maxTouchPoints && navigator.maxTouchPoints > 2) {
+        device = "iPad"
+      }
+    }
     return device;
   }
 }
