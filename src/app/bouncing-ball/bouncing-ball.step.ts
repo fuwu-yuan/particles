@@ -6,7 +6,7 @@ import {RestInCloudAPI} from 'restincloud-node';
 import {Score} from "./score";
 import {environment} from '../../environments/environment';
 import {Ball} from "./Ball";
-import {Plateform} from "../helpers/plateform";
+import * as DeviceDetector from "device-detector-js";
 
 const DEFAULT_CANVAS_SIZE = {
   WIDTH: 900,
@@ -40,14 +40,15 @@ export class BouncingBallStep extends GameStep {
   private bestScore: Entities.Label;
   private mouseMovement : {x: number, y: number} = {x: 0, y: 0};
   private previousTouch: Touch;
-  private deviceType;
+  private device: DeviceDetector.DeviceDetectorResult;
 
   constructor(board: Board) {
     super(board);
-    this.deviceType = Plateform.deviceType();
-    alert(this.deviceType);
+    const deviceDetector = new DeviceDetector();
+    this.device = deviceDetector.parse(navigator.userAgent);
+
     // Mobile/tablet fullscreen resize
-    if (this.deviceType === "tablet" || this.deviceType === "mobile") {
+    if (this.device.device.type !== "desktop") {
       this.updateRatio();
       environment.restincloud_api_scores_key = environment.restincloud_api_scores_key + "-mobile";
     }
@@ -93,7 +94,7 @@ export class BouncingBallStep extends GameStep {
   onEnter(data: any): void {
 
     let btnSize = { width: this.board.width / 3, height: 75};
-    if (this.deviceType === "mobile") {
+    if (this.device.device.type !== "desktop") {
       btnSize.width = this.board.width/2;
     }
     let start = new Entities.Button(
@@ -113,7 +114,7 @@ export class BouncingBallStep extends GameStep {
   }
 
   start() {
-    if (this.deviceType === "tablet" || this.deviceType === "mobile") {
+    if (this.device.device.type !== "desktop") {
       this.updateRatio();
     }
     this.board.addEntities(this.walls);
@@ -135,7 +136,7 @@ export class BouncingBallStep extends GameStep {
     this.elapsedMs = 0;
     this.board.addEntity(this.timerLabel);
 
-    if (this.deviceType !== "desktop") {
+    if (this.device.device.type !== "desktop") {
       this.bestScore.text = "";
     }
   }
@@ -254,20 +255,20 @@ export class BouncingBallStep extends GameStep {
       let top10Container = new Entities.Container(0, 0, this.board.width, this.board.height / 3 * 2);
       let bottomPart = new Entities.Container(0, top10Container.y + top10Container.height, this.board.width, this.board.height / 3);
       top10Container.addEntity(new Entities.Rectangle(0, 0, top10Container.width, top10Container.height, "black", "transparent"));
-      let top10Title = new Entities.Label(0, 50, "TOP 10" + (this.deviceType === "desktop" ? " (DESKTOP)" : " (MOBILE)"), this.board.ctx);
+      let top10Title = new Entities.Label(0, 50, "TOP 10" + (this.device.device.type === "desktop" ? " (DESKTOP)" : " (MOBILE)"), this.board.ctx);
       top10Title.fontSize = 30;
       top10Title.x = top10Container.width / 2 - top10Title.width / 2;
       top10Container.addEntity(top10Title);
 
       this.addScore(this.elapsedMs, this.ennemies.length).then(() => {
         let top10values = this.scores.map((s: Score) => {
-          return `[${s.name}] ${this.formatMilliseconds(s.duration, true)} (${Plateform.deviceName(s.user_agent)}) | ${s.balls} BALLS`;
+          return `[${s.name}] ${this.formatMilliseconds(s.duration, true)} (${this.device.device.model}) | ${s.balls} BALLS`;
         });
         let firstLabel = null;
         let medals = ["🥇 ", "🥈 ", "🥉 ", "4. ", "5. ", "6. ", "7. ", "8. ", "9. ", "10. "];
         for (let i = 0; i < top10values.length; i++) {
           let top10Label = new Entities.Label(10, top10Title.y + top10Title.height + 50 + 30*i, medals[i] + top10values[i], this.board.ctx);
-          if (this.deviceType === "mobile") {
+          if (this.device.device.type === "smartphone") {
             top10Label.fontSize = 15;
           }
           top10Label.x = this.board.width / 2 - top10Label.width / 2;
@@ -435,7 +436,7 @@ export class BouncingBallStep extends GameStep {
         ennemy.speedY += 5;
       }
 
-      if (this.player && !this.player.alive && this.deviceType === "mobile" && this.board.height < screen.height) {
+      if (this.player && !this.player.alive && this.device.device.type !== "desktop" && this.board.height < screen.height) {
         this.board.height += (screen.height - this.board.height)/50;
       }
     }
