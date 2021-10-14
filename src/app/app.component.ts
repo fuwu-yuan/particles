@@ -1,12 +1,12 @@
 import {Component, OnInit} from '@angular/core';
 import { faFacebook, faTwitter, faLinkedin } from '@fortawesome/free-brands-svg-icons';
-import { faMailBulk } from "@fortawesome/free-solid-svg-icons";
+import { faMailBulk } from '@fortawesome/free-solid-svg-icons';
 import {version, repository, name, author, keywords, description, config} from '../../package.json';
 import {Meta, Title} from '@angular/platform-browser';
-import {Board} from "@fuwu-yuan/bgew";
-import {BouncingBallStep} from "./bouncing-ball/bouncing-ball.step";
-import {environment} from "../environments/environment"
-import {Plateform} from "./helpers/plateform";
+import {Board} from '@fuwu-yuan/bgew';
+import {BouncingBallStep} from './bouncing-ball/bouncing-ball.step';
+import {environment} from '../environments/environment';
+import {Plateform} from './helpers/plateform';
 
 @Component({
   selector: 'app-root',
@@ -30,34 +30,34 @@ export class AppComponent implements OnInit {
     this.initMeta();
   }
 
-  private initMeta() {
+  private initMeta(): void {
     // Title
     this.metatitle.setTitle(this.title);
     // Author
-    this.meta.updateTag({name:'author', content: author});
+    this.meta.updateTag({name: 'author', content: author});
     // Keywords
-    this.meta.updateTag({name:'keyword', content: keywords.join(", ")});
+    this.meta.updateTag({name: 'keyword', content: keywords.join(', ')});
     // Description
-    this.meta.updateTag({name:'description', content: description});
+    this.meta.updateTag({name: 'description', content: description});
     // og:title
-    this.meta.updateTag({property:'og:title', content: this.title});
+    this.meta.updateTag({property: 'og:title', content: this.title});
     // og:description
-    this.meta.updateTag({property:'og:description', content: description});
+    this.meta.updateTag({property: 'og:description', content: description});
     // og:image
-    this.meta.updateTag({property: 'og:image', content: window.location.origin + config.deployuri + "/assets/og/image.jpg"});
-    this.meta.updateTag({property: 'og:image:type', content: "image/jpg"});
-    this.meta.updateTag({property: 'og:image:width', content: "1200"});
-    this.meta.updateTag({property: 'og:image:height', content: "627"});
-    this.meta.updateTag({property: 'og:image:alt', content: "Particles game screenshot"});
+    this.meta.updateTag({property: 'og:image', content: window.location.origin + config.deployuri + '/assets/og/image.jpg'});
+    this.meta.updateTag({property: 'og:image:type', content: 'image/jpg'});
+    this.meta.updateTag({property: 'og:image:width', content: '1200'});
+    this.meta.updateTag({property: 'og:image:height', content: '627'});
+    this.meta.updateTag({property: 'og:image:alt', content: 'Particles game screenshot'});
 
   }
 
   ngOnInit(): void {
-    let board = new Board("Particles", "1.0.0", 900, 900, document.getElementById("game-container"), "#FFF");
+    const board = new Board('Particles', '1.0.0', 900, 900, document.getElementById('game-container'), '#FFF');
     board.config.game.FPS = 60;
     board.debug.stats = false;
     board.debug.collision = false;
-    let bouncingBallStep = new BouncingBallStep(board);
+    const bouncingBallStep = new BouncingBallStep(board);
 
     board.addStep(bouncingBallStep);
 
@@ -65,38 +65,38 @@ export class AppComponent implements OnInit {
     board.start();
   }
 
-  getNameAndVersion() {
+  getNameAndVersion(): string {
     return `${this.title} v${version}`;
   }
 
-  closeBanner(event: MouseEvent) {
+  closeBanner(event: MouseEvent): void {
       event.preventDefault();
-      var smartBanner = document.getElementById("smart-banner");
-      smartBanner.style.marginTop = (0 - smartBanner.clientHeight)+"px";
+      const smartBanner = document.getElementById('smart-banner');
+      smartBanner.style.marginTop = (0 - smartBanner.clientHeight) + 'px';
   }
 
-  showInstallHelper(event: MouseEvent) {
+  showInstallHelper(event: MouseEvent): void {
     event.preventDefault();
-    var helper = document.querySelector("#pwa-install-helpers .ios") as HTMLElement;
-    helper.style.display = "block";
+    const helper = document.querySelector('#pwa-install-helpers .ios') as HTMLElement;
+    helper.style.display = 'block';
     this.closeBanner(event);
   }
 
-  closeHelper(event: MouseEvent, plateform: string) {
+  closeHelper(event: MouseEvent, plateform: string): void {
     event.preventDefault();
-    var helper = document.querySelector("#pwa-install-helpers ." + plateform) as HTMLElement;
-    helper.style.display = "none";
+    const helper = document.querySelector('#pwa-install-helpers .' + plateform) as HTMLElement;
+    helper.style.display = 'none';
   }
 
-  get isIos() {
-    return ["iPhone", "iPod", "iPad"].indexOf(Plateform.deviceName()) > -1;
+  get isIos(): boolean {
+    return ['iPhone', 'iPod', 'iPad'].indexOf(Plateform.deviceName()) > -1;
   }
 
-  get deviceName() {
+  get deviceName(): string {
     return Plateform.deviceName();
   }
 
-  isTouchScreen() {
+  isTouchScreen(): boolean {
     return Plateform.isTouchScreen();
   }
 }

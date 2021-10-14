@@ -1,9 +1,9 @@
-import {Ball} from "./Ball";
-import {Wall} from "./wall";
-import {Result, Entity} from '@fuwu-yuan/bgew'
-import {Ennemy} from "./ennemy";
+import {Ball} from './Ball';
+import {Wall} from './wall';
+import {Result, Entity} from '@fuwu-yuan/bgew';
+import {Ennemy} from './ennemy';
 
-const IMAGE = "./assets/bouncing-ball/images/blue_ball.png";
+const IMAGE = './assets/bouncing-ball/images/blue_ball.png';
 
 export class Player extends Ball {
 
@@ -15,7 +15,7 @@ export class Player extends Ball {
   constructor(x: number,
               y: number,
               radius: number) {
-    super(x, y, radius, "#20639B", IMAGE);
+    super(x, y, radius, '#20639B', IMAGE);
     this.onIntersectWithAnyEntity((entity: Entity, collisionWith: Entity, result: Result) => {
       if (collisionWith instanceof Wall) {
         if (this.alive) {
@@ -23,14 +23,15 @@ export class Player extends Ball {
           this.y -= result.overlap * result.overlap_y;
         }
       }
-      if (collisionWith instanceof Ball)
+      if (collisionWith instanceof Ball) {
         if (collisionWith instanceof Ennemy && !(collisionWith as Ennemy).stopped) {
-          this.collisionWithBall(<Ball>collisionWith, result);
+          this.collisionWithBall(collisionWith as Ball, result);
+      }
       }
     });
   }
 
-  draw(ctx: CanvasRenderingContext2D) {
+  draw(ctx: CanvasRenderingContext2D): void {
     super.draw(ctx);
     ctx.drawImage(this._image, this.x - this.radiusX, this.y - this.radiusY, this.width, this.height);
   }

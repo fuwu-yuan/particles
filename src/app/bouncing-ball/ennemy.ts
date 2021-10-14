@@ -1,8 +1,6 @@
-import {Ball} from "./Ball";
-import {Result} from '@fuwu-yuan/bgew'
-import {Wall} from "./wall";
+import {Ball} from './Ball';
 
-const IMAGE = "./assets/bouncing-ball/images/red_ball.png";
+const IMAGE = './assets/bouncing-ball/images/red_ball.png';
 
 export class Ennemy extends Ball {
 
@@ -11,10 +9,10 @@ export class Ennemy extends Ball {
   constructor(x: number,
               y: number,
               radius) {
-    super(x, y, radius, "#ED553B", IMAGE);
+    super(x, y, radius, '#ED553B', IMAGE);
   }
 
-  draw(ctx: CanvasRenderingContext2D) {
+  draw(ctx: CanvasRenderingContext2D): void {
     super.draw(ctx);
     ctx.drawImage(this._image, this.x - this.radiusX, this.y - this.radiusY, this.width, this.height);
   }
