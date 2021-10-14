@@ -306,9 +306,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 
-device-detector-js
-LGPL-3.0
-
 fast-unique-numbers
 MIT
 MIT License
