@@ -8,14 +8,14 @@
   <a href="#close" id="banner-close" class="close" (click)="closeBanner($event)">&times;</a>
 </div>
 <div id="pwa-install-helpers">
-  <div class="ios" (click)="closeHelper($event, 'ios')">
+  <div class="ios {{deviceName}}" (click)="closeHelper($event, 'ios')">
     <a href="#close" class="close">&times;</a>
     Install game <strong>{{name|titlecase}}</strong> on your iPhone/iPad for free.<br/>
     Tap <img alt="share button" src="assets/icons/share-ios.png" height="20"> and then Add to Home Screen
   </div>
 </div>
 <div oncontextmenu="return false" id="game-container"></div>
-<footer>
+<footer [hidden]="isTouchScreen()">
   <span>
     ©{{ getNameAndVersion() }} | Copyright {{ currentYear }} | Developed with ❤️ by <a rel="noreferrer" href="https://stco.fr/stevecohen" target="_blank">Steve Cohen</a> using <a rel="noreferrer" href="https://stco.fr/bgew-github" target="_blank">BGEW</a> | Original idea and concept <a rel="noreferrer" target="_blank" href="http://www.ragdollsoft.com">Matteo Guarnieri</a> | 🎵 by <a rel="noreferrer" target="_blank" href="https://www.youtube.com/channel/UCxlO-bs92DF_SGA0pdIOqOg">Dimrain47</a> | <a rel="noreferrer" href="{{ sources }}" target="_blank">Sources on GitHub</a> | Share on <a rel="noreferrer" target="_blank" class="share-social" href="https://www.facebook.com/sharer/sharer.php?u=https%3A//fuwu-yuan.github.io/{{name}}/"><fa-icon [icon]="faFacebook"></fa-icon></a> <a rel="noreferrer" target="_blank" class="share-social" href="https://twitter.com/intent/tweet?text=J'ai%20d%C3%A9couvert%20un%20super%20jeu%20https%3A//fuwu-yuan.github.io/{{name}}/"><fa-icon [icon]="faTwitter"></fa-icon></a> <a rel="noreferrer" target="_blank" class="share-social" href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A//fuwu-yuan.github.io/{{name}}/&title=Super%20-%20jeu&summary=J'ai%20d%C3%A9couvert%20un%20super%20jeu!%20https%3A//fuwu-yuan.github.io/{{name}}/"><fa-icon [icon]="faLinkedin"></fa-icon></a> <a rel="noreferrer" target="_blank" class="share-social" href="mailto:?subject=J'ai%20d%C3%A9couvert%20un%20super%20jeu!&body=Hey%20!%20J'ai%20d%C3%A9couvert%20un%20super%20jeu!Tu%20viens%20faire%20une%20partie%20en%20ligne%20?%20https%3A//fuwu-yuan.github.io/{{name}}/"><fa-icon [icon]="faMailBulk"></fa-icon></a>
   </span>

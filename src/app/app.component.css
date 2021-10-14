@@ -26,12 +26,6 @@ footer {
   box-sizing: border-box;
 }
 
-@media screen and (max-width: 600px) {
-  footer {
-    display: none;
-  }
-}
-
 footer a:visited,
 footer a:active,
 footer a {
@@ -158,6 +152,21 @@ footer a.share-social {
   margin-bottom: 20px;
   width: 100%;
   box-sizing: border-box;
+}
+
+#pwa-install-helpers .ios.iPad {
+  bottom: initial;
+  top: 0;
+  margin-top: 20px;
+}
+
+#pwa-install-helpers .ios.iPad:after {
+  margin-top: -40px;
+  top: 0;
+  right: 12%;
+  left: auto;
+  border-top: solid 20px transparent;
+  border-bottom: solid 20px #6290C3;
 }
 
 #pwa-install-helpers .ios .close {
