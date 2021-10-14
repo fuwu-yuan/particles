@@ -1,8 +1,8 @@
-import {GameStep, Board} from "@fuwu-yuan/bgew"
+import {GameStep, Board} from '@fuwu-yuan/bgew';
 
 export class MainStep extends GameStep {
 
-  name: string = "main";
+  name = 'main';
 
   constructor(board: Board) {
     super(board);

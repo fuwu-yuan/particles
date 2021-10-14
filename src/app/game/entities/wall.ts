@@ -1,4 +1,4 @@
-import {Entities} from '@fuwu-yuan/bgew'
+import {Entities} from '@fuwu-yuan/bgew';
 
 export class Wall extends Entities.Rectangle {
 

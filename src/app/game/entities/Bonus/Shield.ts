@@ -1,12 +1,12 @@
-import {Bonus} from "./Bonus";
-import {Player} from "../player";
+import {Bonus} from './Bonus';
+import {Player} from '../player';
 
 export class Shield extends Bonus {
-  apply(owner: Player, otherPlayers: Player[]) {
+  apply(owner: Player, otherPlayers: Player[]): void {
   }
 
   protected get Image(): string {
-    return "./assets/bouncing-ball/images/bonus/Shield.png";
+    return './assets/bouncing-ball/images/bonus/Shield.png';
   }
 
 }
