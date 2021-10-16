@@ -268,7 +268,7 @@ export class BouncingBallStep extends GameStep {
 
       this.addScore(this.elapsedMs, this.ennemies.length).then(() => {
         const top10values = this.scores.map((s: Score) => {
-          return `[${s.name}] ${this.formatMilliseconds(s.duration, true)} (${Plateform.deviceName()}) | ${s.balls} BALLS`;
+          return `[${s.name}] ${this.formatMilliseconds(s.duration, true)} (${Plateform.deviceName(s.user_agent)}) | ${s.balls} BALLS`;
         });
         let firstLabel = null;
         const medals = ['🥇 ', '🥈 ', '🥉 ', '4. ', '5. ', '6. ', '7. ', '8. ', '9. ', '10. '];
