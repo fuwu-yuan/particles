@@ -7,6 +7,7 @@ import {Board} from '@fuwu-yuan/bgew';
 import {BouncingBallStep} from './game/steps/bouncing-ball.step';
 import {environment} from '../environments/environment';
 import {Plateform} from './game/helpers/plateform';
+import {MainStep} from './game/steps/main.step';
 
 @Component({
   selector: 'app-root',
@@ -38,22 +39,22 @@ export class AppComponent implements OnInit {
   private preloadImages(): void {
     this.images = [
       /* Balls */
-      'src/assets/bouncing-ball/images/balls/blue_ball.png',
-      'src/assets/bouncing-ball/images/balls/green_ball.png',
-      'src/assets/bouncing-ball/images/balls/purple_ball.png',
-      'src/assets/bouncing-ball/images/balls/red_ball.png',
-      'src/assets/bouncing-ball/images/balls/yellow_ball.png',
+      'assets/bouncing-ball/images/balls/blue_ball.png',
+      'assets/bouncing-ball/images/balls/green_ball.png',
+      'assets/bouncing-ball/images/balls/purple_ball.png',
+      'assets/bouncing-ball/images/balls/red_ball.png',
+      'assets/bouncing-ball/images/balls/yellow_ball.png',
       /* Bonus */
-      'src/assets/bouncing-ball/images/bonus/BigBall.png',
-      'src/assets/bouncing-ball/images/bonus/InvControl.png',
-      'src/assets/bouncing-ball/images/bonus/Invisible.png',
-      'src/assets/bouncing-ball/images/bonus/Invulnerable.png',
-      'src/assets/bouncing-ball/images/bonus/NoBorders.png',
-      'src/assets/bouncing-ball/images/bonus/Random.png',
-      'src/assets/bouncing-ball/images/bonus/Revive.png',
-      'src/assets/bouncing-ball/images/bonus/Rockets.png',
-      'src/assets/bouncing-ball/images/bonus/Shield.png',
-      'src/assets/bouncing-ball/images/bonus/Speed.png'
+      'assets/bouncing-ball/images/bonus/BigBall.png',
+      'assets/bouncing-ball/images/bonus/InvControl.png',
+      'assets/bouncing-ball/images/bonus/Invisible.png',
+      'assets/bouncing-ball/images/bonus/Invulnerable.png',
+      'assets/bouncing-ball/images/bonus/NoBorders.png',
+      'assets/bouncing-ball/images/bonus/Random.png',
+      'assets/bouncing-ball/images/bonus/Revive.png',
+      'assets/bouncing-ball/images/bonus/Rockets.png',
+      'assets/bouncing-ball/images/bonus/Shield.png',
+      'assets/bouncing-ball/images/bonus/Speed.png'
     ];
   }
 
@@ -84,11 +85,16 @@ export class AppComponent implements OnInit {
     board.config.game.FPS = 60;
     board.debug.stats = false;
     board.debug.collision = false;
+
+    const mainStep = new MainStep(board);
     const bouncingBallStep = new BouncingBallStep(board);
 
-    board.addStep(bouncingBallStep);
+    board.addSteps([
+      mainStep,
+      bouncingBallStep
+    ]);
 
-    board.step = bouncingBallStep;
+    board.step = mainStep;
     board.start();
   }
 

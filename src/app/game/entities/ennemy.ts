@@ -2,7 +2,7 @@ import {Ball} from './Ball';
 import {Result} from '@fuwu-yuan/bgew';
 import {Wall} from './wall';
 
-const IMAGE = './assets/bouncing-ball/images/red_ball.png';
+const IMAGE = './assets/bouncing-ball/images/balls/red_ball.png';
 
 export class Ennemy extends Ball {
 

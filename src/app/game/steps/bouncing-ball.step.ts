@@ -29,41 +29,8 @@ const MAX_ENNEMIES = DEFAULT_MAX_ENNEMIES;
 
 export class BouncingBallStep extends GameStep {
 
-  constructor(board: Board) {
-    super(board);
-
-    // Mobile/tablet fullscreen resize
-    if (Plateform.isTouchScreen()) {
-      this.updateRatio();
-      environment.restincloud_api_scores_key = environment.restincloud_api_scores_key + '-mobile';
-    }
-
-    this.walls = [
-      // Left
-      new Wall(-WALL_WIDTH, -WALL_WIDTH, WALL_WIDTH * 2, board.height + 2 * WALL_WIDTH, '#173F5F', '#173F5F'),
-      // Top
-      new Wall(-WALL_WIDTH, -WALL_WIDTH, board.width + 2 * WALL_WIDTH, WALL_WIDTH * 2, '#173F5F', '#173F5F'),
-      // Right
-      new Wall(board.width - WALL_WIDTH, -WALL_WIDTH, WALL_WIDTH * 2, board.height + WALL_WIDTH * 2, '#173F5F', '#173F5F'),
-      // Bottom
-      new Wall(-WALL_WIDTH, board.height - WALL_WIDTH, board.width + WALL_WIDTH * 2, WALL_WIDTH * 2, '#173F5F', '#173F5F')
-    ];
-    // Timer
-    this.timerLabel = new Entities.Label(20, 20, '00:00:00', board.ctx);
-    this.timerLabel.fontSize = 15;
-
-    // Sounds
-    this.board.registerSound('music', './assets/bouncing-ball/sounds/music.mp3', true, 0.1);
-    this.board.registerSound('wall', './assets/bouncing-ball/sounds/wall.mp3', false, 0.7);
-    this.board.registerSound('ball', './assets/bouncing-ball/sounds/ball.mp3', false, 0.7);
-
-    this.restInCloudApi = new RestInCloudAPI(environment.restincloud_api_token);
-    this.bestScore = new Entities.Label(0, 20, '', board.ctx);
-    this.bestScore.fontSize = 15;
-    this.board.addEntity(this.bestScore);
-    this.updateScores().then(() => { this.updateBest(); });
-  }
   name = 'bouncing-ball';
+
   private walls: Wall[];
   private player?: Player;
   private ennemies: Ennemy[] = [];
@@ -76,23 +43,44 @@ export class BouncingBallStep extends GameStep {
   private mouseMovement: {x: number, y: number} = {x: 0, y: 0};
   private previousTouch: Touch;
 
+  constructor(board: Board) {
+    super(board);
+
+    // Timer
+    this.timerLabel = new Entities.Label(20, 20, '00:00:00', board.ctx);
+    this.timerLabel.fontSize = 15;
+
+    // Sounds
+    this.board.registerSound('music', './assets/bouncing-ball/sounds/music.mp3', true, 0.1);
+    this.board.registerSound('wall', './assets/bouncing-ball/sounds/wall.mp3', false, 0.7);
+    this.board.registerSound('ball', './assets/bouncing-ball/sounds/ball.mp3', false, 0.7);
+
+    this.restInCloudApi = new RestInCloudAPI(environment.restincloud_api_token);
+    this.bestScore = new Entities.Label(0, 20, '', board.ctx);
+    this.bestScore.fontSize = 15;
+  }
+
   private static random(min, max): number {
     return Math.floor(Math.random() * max) + min;
   }
 
-  updateRatio(): void {
-    this.board.width = screen.width;
-
-    const ratio = this.board.width / DEFAULT_CANVAS_SIZE.WIDTH;
-
-    this.board.height = DEFAULT_CANVAS_SIZE.HEIGHT * ratio;
-    WALL_WIDTH = DEFAULT_WALL_WIDTH * ratio;
-    BALLS_RADIUS = DEFAULT_BALLS_RADIUS * ratio;
-    BALLS_SPEED.MAX = DEFAULT_BALLS_SPEED.MAX * (1 - ((1 - ratio) / 2));
-    BALLS_SPEED.MIN = DEFAULT_BALLS_SPEED.MIN * (1 - ((1 - ratio) / 2));
-  }
-
   onEnter(data: any): void {
+    // Mobile/tablet fullscreen resize
+    if (Plateform.isTouchScreen()) {
+      this.updateRatio();
+      environment.restincloud_api_scores_key = environment.restincloud_api_scores_key + '-mobile';
+    }
+
+    this.walls = [
+      // Left
+      new Wall(-WALL_WIDTH, -WALL_WIDTH, WALL_WIDTH * 2, this.board.height + 2 * WALL_WIDTH, '#173F5F', '#173F5F'),
+      // Top
+      new Wall(-WALL_WIDTH, -WALL_WIDTH, this.board.width + 2 * WALL_WIDTH, WALL_WIDTH * 2, '#173F5F', '#173F5F'),
+      // Right
+      new Wall(this.board.width - WALL_WIDTH, -WALL_WIDTH, WALL_WIDTH * 2, this.board.height + WALL_WIDTH * 2, '#173F5F', '#173F5F'),
+      // Bottom
+      new Wall(-WALL_WIDTH, this.board.height - WALL_WIDTH, this.board.width + WALL_WIDTH * 2, WALL_WIDTH * 2, '#173F5F', '#173F5F')
+    ];
 
     const btnSize = { width: this.board.width / 3, height: 75};
     if (Plateform.isTouchScreen()) {
@@ -112,6 +100,21 @@ export class BouncingBallStep extends GameStep {
       this.start();
     });
     this.board.addEntity(start);
+
+    this.board.addEntity(this.bestScore);
+    this.updateScores().then(() => { this.updateBest(); });
+  }
+
+  updateRatio(): void {
+    this.board.width = screen.width;
+
+    const ratio = this.board.width / DEFAULT_CANVAS_SIZE.WIDTH;
+
+    this.board.height = DEFAULT_CANVAS_SIZE.HEIGHT * ratio;
+    WALL_WIDTH = DEFAULT_WALL_WIDTH * ratio;
+    BALLS_RADIUS = DEFAULT_BALLS_RADIUS * ratio;
+    BALLS_SPEED.MAX = DEFAULT_BALLS_SPEED.MAX * (1 - ((1 - ratio) / 2));
+    BALLS_SPEED.MIN = DEFAULT_BALLS_SPEED.MIN * (1 - ((1 - ratio) / 2));
   }
 
   start(): void {
