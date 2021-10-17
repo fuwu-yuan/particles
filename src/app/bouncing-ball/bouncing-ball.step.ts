@@ -125,15 +125,15 @@ export class BouncingBallStep extends GameStep {
     this.board.playSound('music');
 
     this.createPlayerBall();
-    this.addEnnemy(50, 50, BALLS_SPEED.MIN, 90);
-    /*this.addEnnemy();
+    this.addEnnemy();
+    this.addEnnemy();
     this.addEnnemy();
     this.newEnnemyTimer = this.board.addTimer(NEW_BALL_TIMER * 1000, () => {
       this.addEnnemy();
       if (this.ennemies.length === MAX_ENNEMIES) {
         this.newEnnemyTimer.stop();
       }
-    }, true);*/
+    }, true);
     this.elapsedMs = 0;
     this.board.addEntity(this.timerLabel);
 
@@ -159,7 +159,6 @@ export class BouncingBallStep extends GameStep {
 
     document.addEventListener('mousemove', (event: MouseEvent) => {
       if (!Plateform.isTouchScreen()) {
-        console.log("Mouse move");
         const rect = this.board.canvas.getBoundingClientRect();
         const x = (event.clientX - rect.left) * (1 / this.board.scale);
         const y = (event.clientY - rect.top) * (1 / this.board.scale);
@@ -168,7 +167,6 @@ export class BouncingBallStep extends GameStep {
     });
 
     document.addEventListener('touchmove', (event: TouchEvent) => {
-      console.log("touchmove");
       if (this.previousTouch) {
         const movementX = (event.touches.item(0).pageX - this.previousTouch.pageX) * 1.5; // x1.5 to speed up touch movement
         const movementY = (event.touches.item(0).pageY - this.previousTouch.pageY) * 1.5;
@@ -180,7 +178,6 @@ export class BouncingBallStep extends GameStep {
     });
 
     document.addEventListener('touchend', () => {
-      console.log("touchend");
       this.previousTouch = null;
     });
 
