@@ -23,7 +23,7 @@ const DEFAULT_MAX_ENNEMIES = 25;
 let WALL_WIDTH = DEFAULT_WALL_WIDTH;
 let BALLS_RADIUS = DEFAULT_BALLS_RADIUS;
 const BALL_START_TIMER = DEFAULT_BALL_START_TIMER;
-const BALLS_SPEED = DEFAULT_BALLS_SPEED;
+const BALLS_SPEED = Object.assign({}, DEFAULT_BALLS_SPEED);
 const NEW_BALL_TIMER = DEFAULT_NEW_BALL_TIMER;
 const MAX_ENNEMIES = DEFAULT_MAX_ENNEMIES;
 
@@ -88,8 +88,8 @@ export class BouncingBallStep extends GameStep {
     this.board.height = DEFAULT_CANVAS_SIZE.HEIGHT * ratio;
     WALL_WIDTH = DEFAULT_WALL_WIDTH * ratio;
     BALLS_RADIUS = DEFAULT_BALLS_RADIUS * ratio;
-    BALLS_SPEED.MAX = DEFAULT_BALLS_SPEED.MAX * (1 - ((1 - ratio) / 2));
-    BALLS_SPEED.MIN = DEFAULT_BALLS_SPEED.MIN * (1 - ((1 - ratio) / 2));
+    BALLS_SPEED.MAX = DEFAULT_BALLS_SPEED.MAX * ratio;
+    BALLS_SPEED.MIN = DEFAULT_BALLS_SPEED.MIN * ratio;
   }
 
   onEnter(data: any): void {
@@ -125,15 +125,15 @@ export class BouncingBallStep extends GameStep {
     this.board.playSound('music');
 
     this.createPlayerBall();
-    this.addEnnemy();
-    this.addEnnemy();
+    this.addEnnemy(50, 50, BALLS_SPEED.MIN, 90);
+    /*this.addEnnemy();
     this.addEnnemy();
     this.newEnnemyTimer = this.board.addTimer(NEW_BALL_TIMER * 1000, () => {
       this.addEnnemy();
       if (this.ennemies.length === MAX_ENNEMIES) {
         this.newEnnemyTimer.stop();
       }
-    }, true);
+    }, true);*/
     this.elapsedMs = 0;
     this.board.addEntity(this.timerLabel);
 
@@ -158,19 +158,20 @@ export class BouncingBallStep extends GameStep {
     };
 
     document.addEventListener('mousemove', (event: MouseEvent) => {
-      const rect = this.board.canvas.getBoundingClientRect();
-      const x = (event.clientX - rect.left) * (1 / this.board.scale);
-      const y = (event.clientY - rect.top) * (1 / this.board.scale);
-      playerInputMove(x, y);
+      if (!Plateform.isTouchScreen()) {
+        console.log("Mouse move");
+        const rect = this.board.canvas.getBoundingClientRect();
+        const x = (event.clientX - rect.left) * (1 / this.board.scale);
+        const y = (event.clientY - rect.top) * (1 / this.board.scale);
+        playerInputMove(x, y);
+      }
     });
 
     document.addEventListener('touchmove', (event: TouchEvent) => {
-      const rect = this.board.canvas.getBoundingClientRect();
+      console.log("touchmove");
       if (this.previousTouch) {
-        const movementX = (event.touches.item(0).pageX - this.previousTouch.pageX) * 2; // x2 to speed up touch movement
-        const movementY = (event.touches.item(0).pageY - this.previousTouch.pageY) * 2;
-        // let x = (event.touches.item(0).clientX - rect.left) * (1/this.board.scale);
-        // let y = (event.touches.item(0).clientY - rect.top) * (1/this.board.scale);
+        const movementX = (event.touches.item(0).pageX - this.previousTouch.pageX) * 1.5; // x1.5 to speed up touch movement
+        const movementY = (event.touches.item(0).pageY - this.previousTouch.pageY) * 1.5;
         const x = this.player.x + movementX;
         const y = this.player.y + movementY;
         playerInputMove(x, y);
@@ -179,15 +180,19 @@ export class BouncingBallStep extends GameStep {
     });
 
     document.addEventListener('touchend', () => {
+      console.log("touchend");
       this.previousTouch = null;
     });
 
-    /*this.board.onMouseEvent("mousemove", (event, x, y) => {
-      this.mouseMovement.x = event.movementX;
-      this.mouseMovement.y = event.movementY;
-      if (this.player.alive && x > WALL_WIDTH && y > WALL_WIDTH) {
-        this.player.x = x;
-        this.player.y = y;
+    /*this.board.onMouseEvent('mousemove', (event, x, y) => {
+      if (!Plateform.isTouchScreen()) {
+        console.log("mousemove");
+        this.mouseMovement.x = event.movementX;
+        this.mouseMovement.y = event.movementY;
+        if (this.player.alive && x > WALL_WIDTH && y > WALL_WIDTH) {
+          this.player.x = x;
+          this.player.y = y;
+        }
       }
     });*/
     this.board.onMouseEvent('mouseenter', () => {
