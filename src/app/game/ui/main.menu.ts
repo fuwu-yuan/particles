@@ -23,27 +23,52 @@ export class MainMenu extends Entities.Container {
 
   private initTitle(): void {
     const title = new Entities.Label(0, 100, 'Don\'t touch red balls', this.board.ctx);
-    title.fontSize = 60;
-    title.x = this.width / 2 - title.width / 2;
+    title.fontColor = 'white';
+    title.fontFamily = 'KenvectorFutureRegular';
+    title.fontSize = 50;
+    title.x = 75;
     this.addEntity(title);
   }
 
   private initSinglePlayerButton(): void {
-    const button = new Button1(0, 0, BUTTONS_WIDTH, BUTTONS_HEIGHT, UIColor.BLUE, { text: 'Singleplayer', fontSize: 40, fontColor: 'white' });
+    const button = new Button1(0, 0, BUTTONS_WIDTH, BUTTONS_HEIGHT, UIColor.BLUE,
+      { text: 'Singleplayer', fontSize: 30, fontColor: 'white', fontFamily: 'KenvectorFutureRegular' });
     const container = new Entities.Container(this.width / 2 - BUTTONS_WIDTH / 2, 275, BUTTONS_WIDTH, BUTTONS_HEIGHT, [button]);
     this.addEntity(container);
+    button.onMouseEvent('click', () => {
+      this.board.moveToStep('singleplayer');
+    }, {once: false});
+    button.onMouseEvent('mouseenter', () => {
+      console.log("enter");
+      button.zoom = 1.05;
+    });
+    button.onMouseEvent('mouseleave', () => {
+      console.log("leave");
+      button.zoom = 1;
+    });
+    button.onMouseEvent('mousemove', () => {
+      console.log("move");
+    });
   }
 
   private initMultiplayerButton(): void {
-    const button = new Button1(0, 0, BUTTONS_WIDTH, BUTTONS_HEIGHT, UIColor.BLUE, { text: 'Multiplayer', fontSize: 40, fontColor: 'white' });
+    const button = new Button1(0, 0, BUTTONS_WIDTH, BUTTONS_HEIGHT, UIColor.BLUE,
+      { text: 'Multiplayer', fontSize: 30, fontColor: 'white', fontFamily: 'KenvectorFutureRegular' });
     const container = new Entities.Container(this.width / 2 - BUTTONS_WIDTH / 2, 415, BUTTONS_WIDTH, BUTTONS_HEIGHT, [button]);
     this.addEntity(container);
+    button.onMouseEvent('click', () => {
+      this.board.moveToStep('multiplayer');
+    }, {once: false});
   }
 
   private initOptionsButton(): void {
-    const button = new Button1(0, 0, BUTTONS_WIDTH, BUTTONS_HEIGHT, UIColor.BLUE, { text: 'Options', fontSize: 40, fontColor: 'white' });
+    const button = new Button1(0, 0, BUTTONS_WIDTH, BUTTONS_HEIGHT, UIColor.BLUE,
+      { text: 'Options', fontSize: 30, fontColor: 'white', fontFamily: 'KenvectorFutureRegular' });
     const container = new Entities.Container(this.width / 2 - BUTTONS_WIDTH / 2, 555, BUTTONS_WIDTH, BUTTONS_HEIGHT, [button]);
     this.addEntity(container);
+    button.onMouseEvent('click', () => {
+      this.board.moveToStep('options');
+    }, {once: false});
   }
 
   private initSocialButtons(): void {

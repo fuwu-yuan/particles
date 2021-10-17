@@ -11,3 +11,13 @@ html, body {
   right: 0;
   bottom: 0;
 }
+
+@font-face {
+  font-family: 'KenvectorFutureRegular';
+  src: url('assets/bouncing-ball/images/UIpack/Font/kenvector_future.ttf');
+}
+
+@font-face {
+  font-family: 'KenvectorFutureThin';
+  src: url('assets/bouncing-ball/images/UIpack/Font/kenvector_future_thin.ttf');
+}

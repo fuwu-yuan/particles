@@ -4,10 +4,11 @@ import { faMailBulk } from '@fortawesome/free-solid-svg-icons';
 import {version, repository, name, author, keywords, description, config} from '../../package.json';
 import {Meta, Title} from '@angular/platform-browser';
 import {Board} from '@fuwu-yuan/bgew';
-import {BouncingBallStep} from './game/steps/bouncing-ball.step';
+import {SingleplayerStep} from './game/steps/singleplayer.step';
 import {environment} from '../environments/environment';
 import {Plateform} from './game/helpers/plateform';
 import {MainStep} from './game/steps/main.step';
+import {OpeningStep} from './game/steps/opening.step';
 
 @Component({
   selector: 'app-root',
@@ -26,9 +27,6 @@ export class AppComponent implements OnInit {
   images: string[];
 
   constructor(private metatitle: Title, private meta: Meta) {
-
-
-
     if (environment.production) {
       console.log = () => {}; // Silent is gold
     }
@@ -54,7 +52,9 @@ export class AppComponent implements OnInit {
       'assets/bouncing-ball/images/bonus/Revive.png',
       'assets/bouncing-ball/images/bonus/Rockets.png',
       'assets/bouncing-ball/images/bonus/Shield.png',
-      'assets/bouncing-ball/images/bonus/Speed.png'
+      'assets/bouncing-ball/images/bonus/Speed.png',
+      /* Opening */
+      'assets/splashscreens/desktop_splash.jpg'
     ];
   }
 
@@ -81,20 +81,22 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    const board = new Board('Particles', '1.0.0', 900, 900, document.getElementById('game-container'), '#FFF');
+    const board = new Board(name, version, 900, 900, document.getElementById('game-container'), '#FFF');
     board.config.game.FPS = 60;
     board.debug.stats = false;
     board.debug.collision = false;
 
+    const openingStep = new OpeningStep(board);
     const mainStep = new MainStep(board);
-    const bouncingBallStep = new BouncingBallStep(board);
+    const singleplayerStep = new SingleplayerStep(board);
 
     board.addSteps([
+      openingStep,
       mainStep,
-      bouncingBallStep
+      singleplayerStep
     ]);
 
-    board.step = mainStep;
+    board.step = openingStep;
     board.start();
   }
 

@@ -74,6 +74,7 @@ class UINamedPiece extends UiPiece {
 abstract class Button extends UiPiece {
   protected _UP: { sourceX: number, sourceY: number, sourceH: number, sourceW: number };
   protected _DOWN: { sourceX: number, sourceY: number, sourceH: number, sourceW: number };
+  protected _isDown: boolean = false;
   protected _text = '';
   protected _fontSize = 15;
   protected _fontFamily = 'sans-serif';
@@ -103,19 +104,28 @@ abstract class Button extends UiPiece {
   }
 
   up(): void {
-      this._sourceX = this._UP.sourceX;
-      this._sourceY = this._UP.sourceY;
-      this._sourceW = this._UP.sourceW;
-      this._sourceH = this._UP.sourceH;
+    this._isDown = false;
+    this._sourceX = this._UP.sourceX;
+    this._sourceY = this._UP.sourceY;
+    this._sourceW = this._UP.sourceW;
+    this._sourceH = this._UP.sourceH;
   }
 
   down(): void {
+    this._isDown = true;
     this._sourceX = this._DOWN.sourceX;
     this._sourceY = this._DOWN.sourceY;
     this._sourceW = this._DOWN.sourceW;
     this._sourceH = this._DOWN.sourceH;
   }
 
+  isDown(): boolean {
+    return this._isDown;
+  }
+
+  isUp(): boolean {
+    return !this._isDown;
+  }
 
   draw(ctx: CanvasRenderingContext2D): void {
     super.draw(ctx);
