@@ -22,6 +22,7 @@ export class AppComponent implements OnInit {
   faMailBulk = faMailBulk;
   name = name;
   sources = repository.url;
+  bannerClosed = false;
 
   constructor(private metatitle: Title, private meta: Meta) {
     if (environment.production) {
@@ -63,6 +64,12 @@ export class AppComponent implements OnInit {
 
     board.step = bouncingBallStep;
     board.start();
+
+    board.canvas.addEventListener('click', (event: MouseEvent) => {
+      if (!this.bannerClosed) {
+        this.closeBanner(event);
+      }
+    }, { once: true });
   }
 
   getNameAndVersion(): string {
@@ -71,6 +78,7 @@ export class AppComponent implements OnInit {
 
   closeBanner(event: MouseEvent): void {
       event.preventDefault();
+      this.bannerClosed = true;
       const smartBanner = document.getElementById('smart-banner');
       smartBanner.style.marginTop = (0 - smartBanner.clientHeight) + 'px';
   }
