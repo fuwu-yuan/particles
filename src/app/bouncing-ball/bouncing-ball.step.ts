@@ -113,7 +113,7 @@ export class BouncingBallStep extends GameStep {
     start.onMouseEvent('click', () => {
       this.board.removeEntity(start);
       this.start();
-      AppComponent.angulartics2Matomo.eventTrack.next({
+      AppComponent.angulartics2.eventTrack.next({
         action: 'start',
       });
     });
@@ -288,7 +288,7 @@ export class BouncingBallStep extends GameStep {
       top10Title.x = top10Container.width / 2 - top10Title.width / 2;
       top10Container.addEntity(top10Title);
 
-      AppComponent.angulartics2Matomo.eventTrack.next({
+      AppComponent.angulartics2.eventTrack.next({
         action: 'loose',
         properties: {
           time: this.elapsedMs,
@@ -339,7 +339,7 @@ export class BouncingBallStep extends GameStep {
           this.board.removeEntity(ennemy);
         }
         this.start();
-        AppComponent.angulartics2Matomo.eventTrack.next({
+        AppComponent.angulartics2.eventTrack.next({
           action: 'restart',
         });
       });
@@ -390,7 +390,7 @@ export class BouncingBallStep extends GameStep {
       const rank = this.getRank(time);
       console.log('Player rank: ' + rank);
       if (this.scores !== null && rank <= 10) {
-        AppComponent.angulartics2Matomo.eventTrack.next({
+        AppComponent.angulartics2.eventTrack.next({
           action: 'top10',
           properties: {
             label: 'newtop10',
@@ -398,7 +398,7 @@ export class BouncingBallStep extends GameStep {
         });
         let name = window.prompt('Congratulation, you are in TOP 10 ! Enter your name (10 char max) :', '');
         if (name === '' || name === null) {
-          AppComponent.angulartics2Matomo.eventTrack.next({
+          AppComponent.angulartics2.eventTrack.next({
             action: 'top10',
             properties: {
               label: 'undo',

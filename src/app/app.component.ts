@@ -8,6 +8,7 @@ import {BouncingBallStep} from './bouncing-ball/bouncing-ball.step';
 import {environment} from '../environments/environment';
 import {Plateform} from './helpers/plateform';
 import { Angulartics2Matomo } from 'angulartics2/matomo';
+import {Angulartics2} from 'angulartics2';
 
 @Component({
   selector: 'app-root',
@@ -17,6 +18,7 @@ import { Angulartics2Matomo } from 'angulartics2/matomo';
 export class AppComponent implements OnInit {
 
   public static angulartics2Matomo;
+  public static angulartics2;
 
   title = 'Particles - Don\'t touch red balls!';
   gameengine = 'BGEW GameEngine';
@@ -32,9 +34,11 @@ export class AppComponent implements OnInit {
   constructor(
     private metatitle: Title,
     private meta: Meta,
-    private angulartics2Matomo: Angulartics2Matomo
+    private angulartics2Matomo: Angulartics2Matomo,
+    private angulartics2: Angulartics2
   ) {
     AppComponent.angulartics2Matomo = angulartics2Matomo;
+    AppComponent.angulartics2 = angulartics2;
     if (environment.production) {
       angulartics2Matomo.startTracking();
       console.log = () => {}; // Silent is gold
