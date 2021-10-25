@@ -56,17 +56,20 @@ footer a.share-social {
 }
 .smart-banner {
   zoom: 1;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  position: absolute;
+  border-top: solid 1px #B7B7B7;
+  border-bottom: solid 1px #B7B7B7;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   -ms-box-sizing: border-box;
   -o-box-sizing: border-box;
   box-sizing: border-box;
-  background: #d1d1d1;
-  background: -webkit-gradient(linear,left bottom,left top,color-stop(0,#d1d1d1),color-stop(1,#f8f8f8));
-  background: -ms-linear-gradient(bottom,#d1d1d1,#f8f8f8);
-  background: -moz-linear-gradient(bottom,#d1d1d1 0%,#f8f8f8 100%);
+  background: #F2F2F2;
   padding: 10px 10px 10px 31px;
-  position: relative;
   -webkit-transition: margin-top .3s linear;
 }
 .smart-banner:before, .smart-banner:after {
@@ -84,8 +87,9 @@ footer a.share-social {
   padding-top: 7px;
 }
 .smart-banner .name {
-  font-size: 12px;
-  width: 163px;
+  color: #010101;
+  font-size: 14px;
+  width: 170px;
   overflow: hidden;
   text-overflow: ellipsis;
   display: block;
@@ -93,8 +97,8 @@ footer a.share-social {
 }
 .smart-banner .author {
   display: block;
-  font-size: 11px;
-  color: #888;
+  font-size: 12px;
+  color: #424242;
   padding-top: 2px;
 }
 .smart-banner .icon {
@@ -104,7 +108,7 @@ footer a.share-social {
   vertical-align: top;
   box-shadow: 0 1px 3px black;
   float: left;
-  margin: 0 10px;
+  margin-right: 10px;
 }
 .smart-banner .close {
   position: absolute;
@@ -118,6 +122,22 @@ footer a.share-social {
   text-decoration: none;
   color: rgba(0,0,0,0.3);
 }
+
+.smart-banner .btn2 {
+  color: #1481FC;
+  float: right;
+  font-size: 16px;
+  position: absolute;
+  width: 90px;
+  padding: 25px 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  vertical-align: middle;
+  text-align: center;
+  text-decoration: none;
+}
+
 .smart-banner .btn {
   text-decoration: none;
   margin-top: 10px;

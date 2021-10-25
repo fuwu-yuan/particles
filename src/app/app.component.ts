@@ -14,7 +14,8 @@ import {Plateform} from './helpers/plateform';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
-  title = 'Particles - Don\'t touch red balls! | BGEW Game';
+  title = 'Particles - Don\'t touch red balls!';
+  gameengine = 'BGEW GameEngine';
   currentYear: number = new Date().getFullYear();
   faFacebook = faFacebook;
   faTwitter = faTwitter;
@@ -33,7 +34,7 @@ export class AppComponent implements OnInit {
 
   private initMeta(): void {
     // Title
-    this.metatitle.setTitle(this.title);
+    this.metatitle.setTitle(this.title + ' | ' + this.gameengine);
     // Author
     this.meta.updateTag({name: 'author', content: author});
     // Keywords
@@ -41,7 +42,7 @@ export class AppComponent implements OnInit {
     // Description
     this.meta.updateTag({name: 'description', content: description});
     // og:title
-    this.meta.updateTag({property: 'og:title', content: this.title});
+    this.meta.updateTag({property: 'og:title', content: this.title + ' | ' + this.gameengine});
     // og:description
     this.meta.updateTag({property: 'og:description', content: description});
     // og:image

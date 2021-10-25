@@ -1,17 +1,17 @@
 <div id="smart-banner" class="smart-banner" [hidden]="!isIos">
   <img src="assets/icons/apple-touch-icon.png" class="icon">
   <div class="meta">
-    <span class="name">{{ getNameAndVersion() }}</span>
-    <small class="author">Steve Cohen | BGEW Game</small>
+    <span class="name">{{ title }}</span>
+    <small class="author">Steve Cohen | BGEW GameEngine</small>
   </div>
-  <a href="#install" class="btn" target="pwa" (click)="showInstallHelper($event)">Install {{name|titlecase}}</a>
+  <a href="#install" class="btn2" target="pwa" (click)="showInstallHelper($event)">INSTALL</a>
   <a href="#close" id="banner-close" class="close" (click)="closeBanner($event)">&times;</a>
 </div>
 <div id="pwa-install-helpers">
   <div class="ios {{deviceName}}" (click)="closeHelper($event, 'ios')">
     <a href="#close" class="close">&times;</a>
     Install game <strong>{{name|titlecase}}</strong> on your iPhone/iPad for free.<br/>
-    Tap <img alt="share button" src="assets/icons/share-ios.png" height="20"> and then Add to Home Screen
+    Tap <img alt="share button" src="assets/icons/share-ios.png" height="20"> (in Safari browser) and then tap "Add to Home Screen"
   </div>
 </div>
 <div oncontextmenu="return false" id="game-container"></div>

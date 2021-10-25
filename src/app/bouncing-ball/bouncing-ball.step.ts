@@ -75,6 +75,8 @@ export class BouncingBallStep extends GameStep {
   private bestScore: Entities.Label;
   private mouseMovement: {x: number, y: number} = {x: 0, y: 0};
   private previousTouch: Touch;
+  private tuto: Entities.Image;
+  private hideTuto: boolean = false;
 
   private static random(min, max): number {
     return Math.floor(Math.random() * max) + min;
@@ -145,6 +147,19 @@ export class BouncingBallStep extends GameStep {
   private createPlayerBall(): void {
     this.player = new Player(this.board.width / 2, this.board.height / 2, BALLS_RADIUS);
     this.player.alive = true;
+    this.tuto = new Entities.Image('assets/bouncing-ball/images/tuto-' + (Plateform.isTouchScreen() ? 'touch' : 'mouse') + '.png',
+      3 * this.board.width / 8,
+      this.board.height / 2 - this.board.width / 8,
+      this.board.width / 4,
+      this.board.width / 4
+    );
+    if (Plateform.isTouchScreen()) {
+      this.tuto.y += this.tuto.height * 31 / 100;
+    }
+    this.hideTuto = false;
+    this.board.addTimer(3000, () => {
+      this.hideTuto = true;
+    });
 
     const playerInputMove = (x: number, y: number) => {
       x = x < WALL_WIDTH ? WALL_WIDTH : x;
@@ -202,6 +217,7 @@ export class BouncingBallStep extends GameStep {
     });
 
     this.board.addEntity(this.player);
+    this.board.addEntity(this.tuto);
   }
 
   addEnnemy(x?: number, y?: number, speed?: number, angle?: number): Ennemy {
@@ -457,6 +473,16 @@ export class BouncingBallStep extends GameStep {
 
       if (this.player && !this.player.alive && Plateform.isTouchScreen() && this.board.height < screen.height) {
         this.board.height += (screen.height - this.board.height) / 50;
+      }
+    }
+
+    if (this.hideTuto === true) {
+      this.tuto.opacity -= 1 / (1000 / delta);
+      console.log(this.tuto.opacity);
+      if (this.tuto.opacity <= 0) {
+        this.tuto.opacity = 0;
+        this.hideTuto = false;
+        this.board.removeEntity(this.tuto);
       }
     }
   }
