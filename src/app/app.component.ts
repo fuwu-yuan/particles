@@ -7,6 +7,7 @@ import {Board} from '@fuwu-yuan/bgew';
 import {BouncingBallStep} from './bouncing-ball/bouncing-ball.step';
 import {environment} from '../environments/environment';
 import {Plateform} from './helpers/plateform';
+import { Angulartics2Matomo } from 'angulartics2/matomo';
 
 @Component({
   selector: 'app-root',
@@ -14,6 +15,9 @@ import {Plateform} from './helpers/plateform';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
+
+  public static angulartics2Matomo;
+
   title = 'Particles - Don\'t touch red balls!';
   gameengine = 'BGEW GameEngine';
   currentYear: number = new Date().getFullYear();
@@ -25,8 +29,14 @@ export class AppComponent implements OnInit {
   sources = repository.url;
   bannerClosed = false;
 
-  constructor(private metatitle: Title, private meta: Meta) {
+  constructor(
+    private metatitle: Title,
+    private meta: Meta,
+    private angulartics2Matomo: Angulartics2Matomo
+  ) {
+    AppComponent.angulartics2Matomo = angulartics2Matomo;
     if (environment.production) {
+      angulartics2Matomo.startTracking();
       console.log = () => {}; // Silent is gold
     }
     this.initMeta();

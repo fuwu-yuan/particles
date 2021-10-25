@@ -3,6 +3,8 @@ import { NgModule } from '@angular/core';
 
 import { AppComponent } from './app.component';
 import {FontAwesomeModule} from '@fortawesome/angular-fontawesome';
+import { Angulartics2Module } from 'angulartics2';
+import { Angulartics2Matomo } from 'angulartics2/matomo';
 
 @NgModule({
   declarations: [
@@ -10,7 +12,8 @@ import {FontAwesomeModule} from '@fortawesome/angular-fontawesome';
   ],
   imports: [
     BrowserModule,
-    FontAwesomeModule
+    FontAwesomeModule,
+    Angulartics2Module.forRoot(),
   ],
   providers: [],
   bootstrap: [AppComponent]

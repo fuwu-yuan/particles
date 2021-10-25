@@ -7,6 +7,7 @@ import {Score} from './score';
 import {environment} from '../../environments/environment';
 import {Ball} from './Ball';
 import {Plateform} from '../helpers/plateform';
+import {AppComponent} from '../app.component';
 
 const DEFAULT_CANVAS_SIZE = {
   WIDTH: 900,
@@ -112,6 +113,9 @@ export class BouncingBallStep extends GameStep {
     start.onMouseEvent('click', () => {
       this.board.removeEntity(start);
       this.start();
+      AppComponent.angulartics2Matomo.eventTrack.next({
+        action: 'start',
+      });
     });
     this.board.addEntity(start);
   }
@@ -284,6 +288,13 @@ export class BouncingBallStep extends GameStep {
       top10Title.x = top10Container.width / 2 - top10Title.width / 2;
       top10Container.addEntity(top10Title);
 
+      AppComponent.angulartics2Matomo.eventTrack.next({
+        action: 'loose',
+        properties: {
+          time: this.elapsedMs,
+          ennemies: this.ennemies.length,
+        },
+      });
       this.addScore(this.elapsedMs, this.ennemies.length).then(() => {
         const top10values = this.scores.map((s: Score) => {
           return `[${s.name}] ${this.formatMilliseconds(s.duration, true)} (${Plateform.deviceName(s.user_agent)}) | ${s.balls} BALLS`;
@@ -328,6 +339,9 @@ export class BouncingBallStep extends GameStep {
           this.board.removeEntity(ennemy);
         }
         this.start();
+        AppComponent.angulartics2Matomo.eventTrack.next({
+          action: 'restart',
+        });
       });
       bottomPart.addEntity(restart);
 
@@ -376,8 +390,22 @@ export class BouncingBallStep extends GameStep {
       const rank = this.getRank(time);
       console.log('Player rank: ' + rank);
       if (this.scores !== null && rank <= 10) {
-        let name = window.prompt('Congratulation, you are in TOP 10 ! Please enter your name (10 char max) :', '');
-        if (name === '' || name === null) { return; }
+        AppComponent.angulartics2Matomo.eventTrack.next({
+          action: 'top10',
+          properties: {
+            label: 'newtop10',
+          },
+        });
+        let name = window.prompt('Congratulation, you are in TOP 10 ! Enter your name (10 char max) :', '');
+        if (name === '' || name === null) {
+          AppComponent.angulartics2Matomo.eventTrack.next({
+            action: 'top10',
+            properties: {
+              label: 'undo',
+            },
+          });
+          return;
+        }
         name = name.trim().slice(0, 10);
         return this.getClientIp().then((ip: any) => {
           // console.log("ip: ", ip);
@@ -436,7 +464,7 @@ export class BouncingBallStep extends GameStep {
 
   private getClientIp(): Promise<any> {
     return new Promise<any>((resolve, reject) => {
-      const xhttp = new XMLHttpRequest();
+      /*const xhttp = new XMLHttpRequest();
       xhttp.onreadystatechange = function(): void {
         if (this.readyState === 4) {
           if (this.status === 200) {
@@ -448,7 +476,8 @@ export class BouncingBallStep extends GameStep {
         }
       };
       xhttp.open('GET', '//api.ipstack.com/check?access_key=5f3d4ae4b4dceb19f4300c139e4a73d7', true);
-      xhttp.send();
+      xhttp.send();*/
+      resolve();
     });
   }
 
