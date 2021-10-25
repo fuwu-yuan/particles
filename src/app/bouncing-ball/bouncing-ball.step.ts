@@ -115,6 +115,7 @@ export class BouncingBallStep extends GameStep {
       this.start();
       AppComponent.angulartics2.eventTrack.next({
         action: 'start',
+        properties: { category: 'InGame' }
       });
     });
     this.board.addEntity(start);
@@ -291,6 +292,7 @@ export class BouncingBallStep extends GameStep {
       AppComponent.angulartics2.eventTrack.next({
         action: 'loose',
         properties: {
+          category: 'InGame',
           time: this.elapsedMs,
           ennemies: this.ennemies.length,
         },
@@ -341,6 +343,7 @@ export class BouncingBallStep extends GameStep {
         this.start();
         AppComponent.angulartics2.eventTrack.next({
           action: 'restart',
+          properties: { category: 'InGame' }
         });
       });
       bottomPart.addEntity(restart);
@@ -394,6 +397,7 @@ export class BouncingBallStep extends GameStep {
           action: 'top10',
           properties: {
             label: 'newtop10',
+           category: 'InGame'
           },
         });
         let name = window.prompt('Congratulation, you are in TOP 10 ! Enter your name (10 char max) :', '');
@@ -402,6 +406,7 @@ export class BouncingBallStep extends GameStep {
             action: 'top10',
             properties: {
               label: 'undo',
+              category: 'InGame'
             },
           });
           return;
