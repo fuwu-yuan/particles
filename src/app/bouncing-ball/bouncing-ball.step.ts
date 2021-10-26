@@ -121,6 +121,70 @@ export class BouncingBallStep extends GameStep {
       });
     });
     this.board.addEntity(start);
+    this.onVisibilityChange((visible) => {
+      if (visible === false) {
+        this.board.pause();
+      }else {
+        this.board.resume();
+      }
+    });
+  }
+
+  onVisibilityChange(callback: (visible: boolean) => void): void {
+    let visible = true;
+    if (!callback) {
+      throw new Error('no callback given');
+    }
+    function focused(): void {
+      if (!visible) {
+        callback(visible = true);
+      }
+    }
+    function unfocused(): void {
+      if (visible) {
+        callback(visible = false);
+      }
+    }
+    // Standards:
+    if ('hidden' in document) {
+      visible = !document.hidden;
+      document.addEventListener('visibilitychange',
+        () => {(document.hidden ? unfocused : focused)(); });
+    }
+    if ('mozHidden' in document) {
+      // @ts-ignore
+      visible = !document.mozHidden;
+      // @ts-ignore
+      document.addEventListener('mozvisibilitychange',
+        // @ts-ignore
+        () => {(document.mozHidden ? unfocused : focused)(); });
+    }
+    if ('webkitHidden' in document) {
+      // @ts-ignore
+      visible = !document.webkitHidden;
+      // @ts-ignore
+      document.addEventListener('webkitvisibilitychange',
+        // @ts-ignore
+        () => {(document.webkitHidden ? unfocused : focused)(); });
+    }
+    if ('msHidden' in document) {
+      // @ts-ignore
+      visible = !document.msHidden;
+      // @ts-ignore
+      document.addEventListener('msvisibilitychange',
+        // @ts-ignore
+        () => {(document.msHidden ? unfocused : focused)(); });
+    }
+    // IE 9 and lower:
+    if ('onfocusin' in document) {
+      // @ts-ignore
+      document.onfocusin = focused;
+      // @ts-ignore
+      document.onfocusout = unfocused;
+    }
+    // All others:
+    window.onpageshow = window.onfocus = focused;
+    window.onpagehide = window.onblur = unfocused;
   }
 
   start(): void {

@@ -46,7 +46,7 @@
     "@fortawesome/fontawesome-svg-core": "^1.2.35",
     "@fortawesome/free-brands-svg-icons": "^5.15.3",
     "@fortawesome/free-solid-svg-icons": "^5.15.3",
-    "@fuwu-yuan/bgew": "^1.9.0",
+    "@fuwu-yuan/bgew": "^1.10.0",
     "angulartics2": "^10.1.0",
     "restincloud-node": "^1.0.0",
     "rxjs": "~6.6.0",
