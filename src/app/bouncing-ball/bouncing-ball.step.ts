@@ -14,6 +14,8 @@ const DEFAULT_CANVAS_SIZE = {
   HEIGHT: 900
 };
 
+const INSTAGRAM = 'https://www.instagram.com/dev.stevecohenfr';
+
 const DEFAULT_WALL_WIDTH = 10;
 const DEFAULT_BALLS_RADIUS = 20;
 const DEFAULT_BALL_START_TIMER = 3; // ms
@@ -326,7 +328,7 @@ export class BouncingBallStep extends GameStep {
       const btnSize = { width: 200, height: 50 };
       const restart = new Entities.Button(
         bottomPart.width / 2 - btnSize.width / 2,
-        bottomPart.height / 3 * 2 - btnSize.height / 2,
+        bottomPart.height / 3 * 2 - btnSize.height / 2 - 20,
         btnSize.width,
         btnSize.height,
         'Try again'
@@ -348,6 +350,17 @@ export class BouncingBallStep extends GameStep {
       });
       bottomPart.addEntity(restart);
 
+      // Instagram
+      const insta = new Entities.Image('assets/bouncing-ball/images/instagram.png',
+        restart.x, restart.y + restart.height + 20, restart.width, 247 * (restart.width / 750));
+      insta.onMouseEvent('click', () => {
+        AppComponent.angulartics2.eventTrack.next({
+          action: 'instagram',
+          properties: { category: 'InGame' }
+        });
+        this.openInNewTab(INSTAGRAM);
+      });
+      bottomPart.addEntity(insta);
       // SCORE
       const score = new Entities.Label(0, 0, 'Score: ' + this.formatMilliseconds(this.elapsedMs, true) + ' | ' + this.ennemies.length + ' BALLS', this.board.ctx);
       score.fontSize = 25;
@@ -357,6 +370,13 @@ export class BouncingBallStep extends GameStep {
 
       this.board.addEntity(bottomPart);
     }, false);
+  }
+
+  public openInNewTab(href): void {
+    Object.assign(document.createElement('a'), {
+      target: '_blank',
+      href,
+    }).click();
   }
 
   private updateScores(): Promise<void> {
