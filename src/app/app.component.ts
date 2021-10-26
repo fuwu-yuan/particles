@@ -103,12 +103,20 @@ export class AppComponent implements OnInit {
     const helper = document.querySelector('#pwa-install-helpers .ios') as HTMLElement;
     helper.style.display = 'block';
     this.closeBanner(event);
+    AppComponent.angulartics2.eventTrack.next({
+      action: 'show-install-helper',
+      properties: { category: 'PWA' }
+    });
   }
 
   closeHelper(event: MouseEvent, plateform: string): void {
     event.preventDefault();
     const helper = document.querySelector('#pwa-install-helpers .' + plateform) as HTMLElement;
     helper.style.display = 'none';
+    AppComponent.angulartics2.eventTrack.next({
+      action: 'close-install-helper',
+      properties: { category: 'PWA' }
+    });
   }
 
   get isIos(): boolean {
