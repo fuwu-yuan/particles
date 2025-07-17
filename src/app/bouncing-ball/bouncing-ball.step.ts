@@ -2,7 +2,7 @@ import {Board, Entities, GameStep, Timer} from '@fuwu-yuan/bgew';
 import {Player} from './player';
 import {Ennemy} from './ennemy';
 import {Wall} from './wall';
-import {RestInCloudAPI} from 'restincloud-node';
+import {GameDataService} from 'restincloud-node';
 import {Score} from './score';
 import {environment} from '../../environments/environment';
 import {Ball} from './Ball';
@@ -14,7 +14,7 @@ const DEFAULT_CANVAS_SIZE = {
   HEIGHT: 900
 };
 
-const INSTAGRAM = 'https://www.instagram.com/dev.stevecohenfr';
+const INSTAGRAM = 'https://www.instagram.com/dev.stevecohen';
 
 const DEFAULT_WALL_WIDTH = 10;
 const DEFAULT_BALLS_RADIUS = 20;
@@ -31,6 +31,21 @@ const NEW_BALL_TIMER = DEFAULT_NEW_BALL_TIMER;
 const MAX_ENNEMIES = DEFAULT_MAX_ENNEMIES;
 
 export class BouncingBallStep extends GameStep {
+
+  name = 'particles';
+  private walls: Wall[];
+  private player?: Player;
+  private ennemies: Ennemy[] = [];
+  private newEnnemyTimer: Timer;
+  private elapsedMs = 0;
+  private timerLabel: Entities.Label;
+  private gameDataService: GameDataService;
+  private scores?: Score[] = [];
+  private bestScore: Entities.Label;
+  private mouseMovement: {x: number, y: number} = {x: 0, y: 0};
+  private previousTouch: Touch;
+  private tuto: Entities.Image;
+  private hideTuto: boolean = false;
 
   constructor(board: Board) {
     super(board);
@@ -60,26 +75,12 @@ export class BouncingBallStep extends GameStep {
     this.board.registerSound('wall', './assets/bouncing-ball/sounds/wall.mp3', false, 0.7);
     this.board.registerSound('ball', './assets/bouncing-ball/sounds/ball.mp3', false, 0.7);
 
-    this.restInCloudApi = new RestInCloudAPI(environment.restincloud_api_token);
+    this.gameDataService = new GameDataService(environment.restincloud_api_token);
     this.bestScore = new Entities.Label(0, 20, '', board.ctx);
     this.bestScore.fontSize = 15;
     this.board.addEntity(this.bestScore);
     this.updateScores().then(() => { this.updateBest(); });
   }
-  name = 'bouncing-ball';
-  private walls: Wall[];
-  private player?: Player;
-  private ennemies: Ennemy[] = [];
-  private newEnnemyTimer: Timer;
-  private elapsedMs = 0;
-  private timerLabel: Entities.Label;
-  private restInCloudApi: RestInCloudAPI;
-  private scores?: Score[] = [];
-  private bestScore: Entities.Label;
-  private mouseMovement: {x: number, y: number} = {x: 0, y: 0};
-  private previousTouch: Touch;
-  private tuto: Entities.Image;
-  private hideTuto: boolean = false;
 
   private static random(min, max): number {
     return Math.floor(Math.random() * max) + min;
@@ -444,22 +445,21 @@ export class BouncingBallStep extends GameStep {
   }
 
   private updateScores(): Promise<void> {
-    return this.restInCloudApi.getVar(environment.restincloud_api_scores_key)
-      .then((value) => {
-        if (value.code === 'success') {
-          this.scores = JSON.parse(value.result.value);
+    return this.gameDataService.get(environment.restincloud_api_scores_key)
+      .then((result) => {
+        console.log(result);
+        if (result.status === 'success') {
+          this.scores = JSON.parse(result.response.value);
           this.scores = this.scores.sort((a, b) => {
             return b.duration - a.duration;
           });
           console.log('Scores updated: ', this.scores);
-        }else if (value.code === 'not_found') {
-          this.scores = [];
-          console.log('Scores not found in server.');
         }else {
           this.scores = null;
-          console.log(value.code);
+          console.log('Fail to update scores: ', result.response);
         }
       }).catch(err => {
+        console.log(err);
       });
   }
 
@@ -471,7 +471,7 @@ export class BouncingBallStep extends GameStep {
     }
   }
 
-  private addScore(time: number, balls: number): Promise<{ result: Score[]; code: 'success' } | { result: Score[]; code: 'success' }> {
+  private addScore(time: number, balls: number) {
     console.log('Adding score: ', {time, balls});
     return this.updateScores().then(() => {
       const rank = this.getRank(time);
@@ -481,10 +481,10 @@ export class BouncingBallStep extends GameStep {
           action: 'top10',
           properties: {
             label: 'newtop10',
-           category: 'InGame'
+            category: 'InGame'
           },
         });
-        let name = window.prompt('Congratulation, you are in TOP 10 ! Enter your name (10 char max) :', '');
+        let name = window.prompt('Congratulation, you are in TOP 10 ! Enter your name (10 characters max) :', '');
         if (name === '' || name === null) {
           AppComponent.angulartics2.eventTrack.next({
             action: 'top10',
@@ -507,10 +507,14 @@ export class BouncingBallStep extends GameStep {
             user_agent: navigator.userAgent
           });
           this.scores = this.scores.slice(0, 10); // Keep only 10 scores (top 10)
-          return this.restInCloudApi.putVar(environment.restincloud_api_scores_key, JSON.stringify(this.scores)).then((value) => {
-            console.log('Score sent to server: ' + value.code);
-            return {code: 'success', result: this.scores};
+          this.gameDataService.set(environment.restincloud_api_scores_key, JSON.stringify(this.scores)).then((result) => {
+            if (result.status === 'success') {
+              console.log('Score sent to server');
+            }else {
+              console.log('Error while sending score to server');
+            }
           });
+          return {code: 'success', result: this.scores};
         });
       }else {
         return {code: 'success', result: this.scores};
@@ -596,7 +600,6 @@ export class BouncingBallStep extends GameStep {
 
     if (this.hideTuto === true) {
       this.tuto.opacity -= 1 / (1000 / delta);
-      console.log(this.tuto.opacity);
       if (this.tuto.opacity <= 0) {
         this.tuto.opacity = 0;
         this.hideTuto = false;

@@ -4,8 +4,8 @@
 
 export const environment = {
   production: false,
-  restincloud_api_token: "jvwq9bT2t6ykDHqF",
-  restincloud_api_scores_key: "scores-dev"
+  restincloud_api_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkZXZlbG9wZXJVaWQiOiI3REJaTG9BVHBFU1FzTlU1ZU1XVjBXaEVrT1gyIiwiZ2FtZVVpZCI6InBhcnRpY2xlcyIsInRva2VuSWQiOiIwYzc5MWU2Mi1kYjE2LTRlYjAtODBmMy02OTk0NDI0ZmFiN2QiLCJpYXQiOjE3NTI2NTQ5MDR9.eDWsEcm9X2x6ProW9Wnjx0g3K-lLGREE1_71TWKlR9Q',
+  restincloud_api_scores_key: 'scores-dev'
 };
 
 /*
