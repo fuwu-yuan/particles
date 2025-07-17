@@ -46,15 +46,32 @@ export class BouncingBallStep extends GameStep {
   private previousTouch: Touch;
   private tuto: Entities.Image;
   private hideTuto: boolean = false;
+  private leaderboardName: string;
+  private apiScoreKey = environment.restincloud_api_scores_key;
 
   constructor(board: Board) {
     super(board);
 
+    this.leaderboardName = 'desktop';
+
     // Mobile/tablet fullscreen resize
     if (Plateform.isTouchScreen()) {
+      this.leaderboardName = 'mobile';
       this.updateRatio();
-      environment.restincloud_api_scores_key = environment.restincloud_api_scores_key + '-mobile';
     }
+
+    const params = new URLSearchParams(window.location.search);
+    const leaderboardParam = params.get('leaderboard') || params.get('lb');
+    if (leaderboardParam) {
+      const isValid = /^[a-zA-Z0-9_-]+$/.test(leaderboardParam);
+      if (isValid) {
+        this.leaderboardName = leaderboardParam;
+      } else {
+        alert('Invalid leaderboard name: ' + leaderboardParam + '. Please use only letters, numbers, dashes and underscores. Using default leaderboard.');
+      }
+    }
+
+    this.apiScoreKey = this.apiScoreKey + '-' + this.leaderboardName;
 
     this.walls = [
       // Left
@@ -351,7 +368,7 @@ export class BouncingBallStep extends GameStep {
       const top10Container = new Entities.Container(0, 0, this.board.width, this.board.height / 3 * 2);
       const bottomPart = new Entities.Container(0, top10Container.y + top10Container.height, this.board.width, this.board.height / 3);
       top10Container.addEntity(new Entities.Rectangle(0, 0, top10Container.width, top10Container.height, 'black', 'transparent'));
-      const top10Title = new Entities.Label(0, 50, 'TOP 10' + (!Plateform.isTouchScreen() ? ' (DESKTOP)' : ' (MOBILE)'), this.board.ctx);
+      const top10Title = new Entities.Label(0, 50, 'LEADERBOARD' + ' (' + this.leaderboardName.toUpperCase() + ')', this.board.ctx);
       top10Title.fontSize = 30;
       top10Title.x = top10Container.width / 2 - top10Title.width / 2;
       top10Container.addEntity(top10Title);
@@ -365,8 +382,15 @@ export class BouncingBallStep extends GameStep {
         },
       });
       this.addScore(this.elapsedMs, this.ennemies.length).then(() => {
+        const maxNameLength = Math.max(
+          ...this.scores.map(s => s.name.slice(0, 10).length)
+        );
+
+        const maxDeviceLength = Math.max(
+          ...this.scores.map(s => Plateform.deviceName(s.user_agent).length)
+        );
         const top10values = this.scores.map((s: Score) => {
-          return `[${s.name}] ${this.formatMilliseconds(s.duration, true)} (${Plateform.deviceName(s.user_agent)}) | ${s.balls} BALLS`;
+          return this.generateLeaderboardLine(s, maxNameLength, maxDeviceLength);
         });
         let firstLabel = null;
         const medals = ['🥇 ', '🥈 ', '🥉 ', '4. ', '5. ', '6. ', '7. ', '8. ', '9. ', '10. '];
@@ -380,6 +404,7 @@ export class BouncingBallStep extends GameStep {
           if (Plateform.isTouchScreen()) {
             top10Label.fontSize = 15;
           }
+          top10Label.fontFamily = '\'Courier New\', Courier, monospace';
           top10Label.x = this.board.width / 2 - top10Label.width / 2;
           if (firstLabel) { top10Label.x = firstLabel.x; }
           top10Container.addEntity(top10Label);
@@ -427,7 +452,8 @@ export class BouncingBallStep extends GameStep {
       });
       bottomPart.addEntity(insta);
       // SCORE
-      const score = new Entities.Label(0, 0, 'Score: ' + this.formatMilliseconds(this.elapsedMs, true) + ' | ' + this.ennemies.length + ' BALLS', this.board.ctx);
+      const score = new Entities.Label(0, 0, 'Score: ' +
+        this.formatMilliseconds(this.elapsedMs) + ' | ' + this.ennemies.length + ' ENNEMIES', this.board.ctx);
       score.fontSize = 25;
       score.x = bottomPart.width / 2 - score.width / 2;
       score.y = bottomPart.height / 3 - btnSize.height / 2;
@@ -445,18 +471,18 @@ export class BouncingBallStep extends GameStep {
   }
 
   private updateScores(): Promise<void> {
-    return this.gameDataService.get(environment.restincloud_api_scores_key)
+    return this.gameDataService.get(this.apiScoreKey)
       .then((result) => {
         console.log(result);
-        if (result.status === 'success') {
+        if (result.status === 'success' && result.response.value) {
           this.scores = JSON.parse(result.response.value);
           this.scores = this.scores.sort((a, b) => {
             return b.duration - a.duration;
           });
           console.log('Scores updated: ', this.scores);
         }else {
-          this.scores = null;
-          console.log('Fail to update scores: ', result.response);
+          this.scores = [];
+          console.log('Fail to get scores: ', result.response);
         }
       }).catch(err => {
         console.log(err);
@@ -466,60 +492,60 @@ export class BouncingBallStep extends GameStep {
   private updateBest(): void {
     if (this.scores.length > 0) {
       const s = this.scores[0];
-      this.bestScore.text = '🥇 ' + `[${s.name}] ${this.formatMilliseconds(s.duration, true)} | ${s.balls} BALLS`;
+      this.bestScore.text = '🥇 ' + `[${s.name}] ${this.formatMilliseconds(s.duration)} | ${s.balls} BALLS`;
       this.bestScore.x = this.board.width - this.bestScore.width - 20;
     }
   }
 
-  private addScore(time: number, balls: number) {
+  // tslint:disable-next-line:typedef
+  private async addScore(time: number, balls: number) {
     console.log('Adding score: ', {time, balls});
-    return this.updateScores().then(() => {
-      const rank = this.getRank(time);
-      console.log('Player rank: ' + rank);
-      if (this.scores !== null && rank <= 10) {
+    await this.updateScores();
+    const rank = this.getRank(time);
+    console.log('Player rank: ' + rank);
+    if (this.scores !== null && rank <= 10) {
+      AppComponent.angulartics2.eventTrack.next({
+        action: 'top10',
+        properties: {
+          label: 'newtop10',
+          category: 'InGame'
+        },
+      });
+      let name = window.prompt('Congratulation, you are in TOP 10 ! Enter your name (10 characters max) :', '');
+      if (name === '' || name === null) {
         AppComponent.angulartics2.eventTrack.next({
           action: 'top10',
           properties: {
-            label: 'newtop10',
+            label: 'undo',
             category: 'InGame'
           },
         });
-        let name = window.prompt('Congratulation, you are in TOP 10 ! Enter your name (10 characters max) :', '');
-        if (name === '' || name === null) {
-          AppComponent.angulartics2.eventTrack.next({
-            action: 'top10',
-            properties: {
-              label: 'undo',
-              category: 'InGame'
-            },
-          });
-          return;
-        }
-        name = name.trim().slice(0, 10);
-        return this.getClientIp().then((ip: any) => {
-          // console.log("ip: ", ip);
-          this.scores.splice(rank - 1, 0 , {
-            balls,
-            timestamp: (new Date()).getMilliseconds(),
-            duration: time,
-            // ip: ip.ip,
-            name,
-            user_agent: navigator.userAgent
-          });
-          this.scores = this.scores.slice(0, 10); // Keep only 10 scores (top 10)
-          this.gameDataService.set(environment.restincloud_api_scores_key, JSON.stringify(this.scores)).then((result) => {
-            if (result.status === 'success') {
-              console.log('Score sent to server');
-            }else {
-              console.log('Error while sending score to server');
-            }
-          });
-          return {code: 'success', result: this.scores};
-        });
-      }else {
-        return {code: 'success', result: this.scores};
+        return;
       }
-    });
+      name = name.trim().slice(0, 10);
+      return this.getClientIp().then((ip: any) => {
+        // console.log("ip: ", ip);
+        this.scores.splice(rank - 1, 0, {
+          balls,
+          timestamp: (new Date()).getMilliseconds(),
+          duration: time,
+          // ip: ip.ip,
+          name,
+          user_agent: navigator.userAgent
+        });
+        this.scores = this.scores.slice(0, 10); // Keep only 10 scores (top 10)
+        this.gameDataService.set(this.apiScoreKey, JSON.stringify(this.scores)).then((result) => {
+          if (result.status === 'success') {
+            console.log('Score sent to server');
+          } else {
+            console.log('Error while sending score to server');
+          }
+        });
+        return {code: 'success', result: this.scores};
+      });
+    } else {
+      return {code: 'success', result: this.scores};
+    }
   }
 
   private getRank(duration): number {
@@ -533,26 +559,27 @@ export class BouncingBallStep extends GameStep {
     return rank;
   }
 
-  private formatMilliseconds(milliseconds, padStart = false): string {
-    function pad(num): string {
-      return `${num}`.padStart(2, '0');
-    }
-    const asSeconds = milliseconds / 1000;
+  private generateLeaderboardLine(s: Score, maxNameLen: number, maxDeviceLen: number): string {
+    const padLeft = (str: string | number, length: number) => {
+      return str.toString().padStart(length, ' ');
+    };
 
-    let hours;
-    let minutes = Math.floor(asSeconds / 60);
-    const seconds = Math.floor(asSeconds % 60);
-    let ms = Math.floor(milliseconds - (seconds * 1000 + minutes * 60 * 1000));
+    const padRight = (str: string | number, length: number) => {
+      return str.toString().padEnd(length, ' ');
+    };
 
-    if (minutes > 59) {
-      hours = Math.floor(minutes / 60);
-      minutes %= 60;
-      ms = milliseconds - (seconds * 1000 + minutes * 60000 + hours * 3600000);
-    }
+    const name = padRight(s.name.slice(0, 10), maxNameLen);
+    const time = padLeft(this.formatMilliseconds(s.duration), 9);
+    const device = padRight(Plateform.deviceName(s.user_agent), maxDeviceLen);
+    const balls = padLeft(s.balls, 3);
 
-    return hours
-      ? `${padStart ? pad(hours) : hours}:${pad(minutes)}:${pad(seconds)}:${pad(ms)}`
-      : `${padStart ? pad(minutes) : minutes}:${pad(seconds)}:${pad(ms)}`;
+    return `${name} ${time} (${device}) | ${balls} ENNEMIES`;
+  }
+
+  private formatMilliseconds(milliseconds: number): string {
+    const minutes = Math.floor(milliseconds / 60000);
+    const seconds = ((milliseconds % 60000) / 1000).toFixed(2);
+    return `${minutes}:${seconds.padStart(5, '0')}`; // ex: "1:03.45"
   }
 
   private getClientIp(): Promise<any> {
@@ -585,7 +612,7 @@ export class BouncingBallStep extends GameStep {
       this.player.movementSpeedX = this.mouseMovement.x > 0 ? BALLS_SPEED.MIN : -BALLS_SPEED.MIN;
       this.player.movementSpeedY = this.mouseMovement.y > 0 ? BALLS_SPEED.MIN : -BALLS_SPEED.MIN;
       this.elapsedMs += delta;
-      this.timerLabel.text = this.formatMilliseconds(this.elapsedMs, true) + ' | ' + this.ennemies.length + ' BALLS';
+      this.timerLabel.text = this.formatMilliseconds(this.elapsedMs) + ' | ' + this.ennemies.length + ' BALLS';
     }
     if (this.player && !this.player.alive && this.board.entities.indexOf(this.player) > -1) {
       this.player.speedY += 5;
