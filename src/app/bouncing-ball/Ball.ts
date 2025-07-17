@@ -6,6 +6,7 @@ export abstract class Ball extends Entities.Oval {
 
   protected _image: HTMLImageElement;
   private _mass: number;
+  private lastPlayedBallSound: number = 0;
 
   constructor(x: number,
               y: number,
@@ -41,7 +42,11 @@ export abstract class Ball extends Entities.Oval {
   }
 
   collisionWithBall(ball: Ball, result: Result): void {
-    this.board.playSound('ball');
+    const now = (new Date()).getMilliseconds();
+    if (Math.abs((now - this.lastPlayedBallSound)) > 30) {
+      this.board.playSound('ball');
+    }
+    this.lastPlayedBallSound = (new Date()).getMilliseconds();
 
     let thisPosition = new Vector2D(this.x, this.y);
     let thisVelocity = new Vector2D(this.speedX, this.speedY);
