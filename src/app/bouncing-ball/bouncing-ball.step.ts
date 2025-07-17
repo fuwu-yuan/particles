@@ -492,7 +492,7 @@ export class BouncingBallStep extends GameStep {
   private updateBest(): void {
     if (this.scores.length > 0) {
       const s = this.scores[0];
-      this.bestScore.text = '🥇 ' + `[${s.name}] ${this.formatMilliseconds(s.duration)} | ${s.balls} BALLS`;
+      this.bestScore.text = '🥇 ' + `[${s.name}] ${this.formatMilliseconds(s.duration)} | ${s.balls} ENNEMIES`;
       this.bestScore.x = this.board.width - this.bestScore.width - 20;
     }
   }
